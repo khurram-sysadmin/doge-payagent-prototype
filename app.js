@@ -8,7 +8,7 @@ const merchants = [
     deposit: "12.00",
     token: "Supported stable token",
     recipient: "0x7a90...D0GE",
-    description: "Premium sushi partner with a 7:30 PM table for 2.",
+    availability: "2 tables open",
   },
   {
     id: "shibuya-ramen-house",
@@ -19,7 +19,7 @@ const merchants = [
     deposit: "8.00",
     token: "Supported stable token",
     recipient: "0x4b18...TYO1",
-    description: "Fast casual Tokyo partner with evening availability.",
+    availability: "fast confirmation",
   },
   {
     id: "asakusa-izakaya-lab",
@@ -30,7 +30,7 @@ const merchants = [
     deposit: "10.00",
     token: "Supported stable token",
     recipient: "0x91c2...TYO2",
-    description: "Group-friendly partner for local service booking demos.",
+    availability: "group friendly",
   },
 ];
 
@@ -38,7 +38,6 @@ const state = {
   bookingId: "",
   txHash: "",
   timestamp: "",
-  step: 1,
   selectedMerchantId: merchants[0].id,
   recognition: null,
   isListening: false,
@@ -53,10 +52,11 @@ const state = {
 const elements = {
   overallStatus: document.getElementById("overallStatus"),
   requestText: document.getElementById("requestText"),
+  quickPrompt: document.getElementById("quickPrompt"),
   voiceBtn: document.getElementById("voiceBtn"),
   demoVoiceBtn: document.getElementById("demoVoiceBtn"),
   voiceStatus: document.getElementById("voiceStatus"),
-  voiceOrb: document.getElementById("voiceOrb"),
+  voiceStage: document.getElementById("voiceStage"),
   speakReplyToggle: document.getElementById("speakReplyToggle"),
   analyzeBtn: document.getElementById("analyzeBtn"),
   resetBtn: document.getElementById("resetBtn"),
@@ -75,13 +75,8 @@ const elements = {
   detailTime: document.getElementById("detailTime"),
   detailGuests: document.getElementById("detailGuests"),
   detailDeposit: document.getElementById("detailDeposit"),
-  selectedMerchantName: document.getElementById("selectedMerchantName"),
-  selectedMerchantDescription: document.getElementById("selectedMerchantDescription"),
-  selectedMerchantArea: document.getElementById("selectedMerchantArea"),
-  selectedMerchantSlot: document.getElementById("selectedMerchantSlot"),
-  selectedMerchantDeposit: document.getElementById("selectedMerchantDeposit"),
   agentState: document.getElementById("agentState"),
-  agentSteps: Array.from(document.querySelectorAll(".rail-step")),
+  agentSteps: Array.from(document.querySelectorAll(".agent-step")),
   eventFeed: document.getElementById("eventFeed"),
   reservationStatus: document.getElementById("reservationStatus"),
   reservationSummary: document.getElementById("reservationSummary"),
@@ -97,7 +92,7 @@ const elements = {
   merchantFinalStatus: document.getElementById("merchantFinalStatus"),
   paymentFinalStatus: document.getElementById("paymentFinalStatus"),
   dogeReply: document.getElementById("dogeReply"),
-  ladderSteps: Array.from(document.querySelectorAll(".ladder-step")),
+  trackerSteps: Array.from(document.querySelectorAll(".tracker-step")),
 };
 
 function selectedMerchant() {
@@ -123,8 +118,8 @@ function speak(message) {
 function setVoiceState(status, listening = false) {
   state.isListening = listening;
   elements.voiceStatus.textContent = status;
-  elements.voiceOrb.classList.toggle("listening", listening);
-  elements.voiceBtn.textContent = listening ? "Listening..." : "Start Voice Request";
+  elements.voiceStage.classList.toggle("listening", listening);
+  elements.voiceBtn.classList.toggle("listening", listening);
 }
 
 function setAgentStage(stage) {
@@ -137,9 +132,8 @@ function setAgentStage(stage) {
   });
 }
 
-function setBookingStep(step) {
-  state.step = step;
-  elements.ladderSteps.forEach((item) => {
+function setTrackerStep(step) {
+  elements.trackerSteps.forEach((item) => {
     const itemStep = Number(item.dataset.step);
     item.classList.toggle("complete", itemStep < step);
     item.classList.toggle("active", itemStep === step);
@@ -186,6 +180,19 @@ function rankMerchant(extracted) {
   return match ? match.id : merchants[0].id;
 }
 
+function updateDetails() {
+  const merchant = selectedMerchant();
+  elements.detailCuisine.textContent = state.extracted.cuisine;
+  elements.detailCity.textContent = state.extracted.city;
+  elements.detailTime.textContent = state.extracted.time;
+  elements.detailGuests.textContent = state.extracted.guests;
+  elements.detailDeposit.textContent = `${merchant.deposit} ${merchant.token}`;
+  elements.paymentDeposit.textContent = `${merchant.deposit} ${merchant.token}`;
+  elements.paymentToken.textContent = merchant.token;
+  elements.paymentNetwork.textContent = "Mantle";
+  elements.paymentRecipient.textContent = merchant.recipient;
+}
+
 function renderMerchants() {
   elements.merchantCount.textContent = `${merchants.length} partners`;
   elements.merchantList.innerHTML = "";
@@ -198,42 +205,17 @@ function renderMerchants() {
     option.innerHTML = `
       <strong>${merchant.name}</strong>
       <span>${merchant.area} | ${merchant.cuisine} | ${merchant.slot}</span>
-      <em>${merchant.deposit} token deposit</em>
+      <em>${merchant.availability} | ${merchant.deposit} token deposit</em>
     `;
     option.addEventListener("click", () => {
       state.selectedMerchantId = merchant.id;
-      updateMerchantDisplay();
+      updateDetails();
       renderMerchants();
-      if (state.step >= 1 && !state.bookingId) {
-        elements.createReservationBtn.disabled = false;
-      }
-      addEvent("Merchant selected", `${merchant.name} is now the active booking target.`);
+      if (!state.bookingId) elements.createReservationBtn.disabled = false;
+      addEvent("Merchant selected", `${merchant.name} is active for this booking.`);
     });
     elements.merchantList.appendChild(option);
   });
-}
-
-function updateExtractedDetails() {
-  const merchant = selectedMerchant();
-  elements.detailCuisine.textContent = state.extracted.cuisine;
-  elements.detailCity.textContent = state.extracted.city;
-  elements.detailTime.textContent = state.extracted.time;
-  elements.detailGuests.textContent = state.extracted.guests;
-  elements.detailDeposit.textContent = `${merchant.deposit} ${merchant.token}`;
-}
-
-function updateMerchantDisplay() {
-  const merchant = selectedMerchant();
-  elements.selectedMerchantName.textContent = merchant.name;
-  elements.selectedMerchantDescription.textContent = merchant.description;
-  elements.selectedMerchantArea.textContent = merchant.area;
-  elements.selectedMerchantSlot.textContent = merchant.slot;
-  elements.selectedMerchantDeposit.textContent = `${merchant.deposit} token`;
-  elements.paymentDeposit.textContent = `${merchant.deposit} ${merchant.token}`;
-  elements.paymentToken.textContent = merchant.token;
-  elements.paymentNetwork.textContent = "Mantle";
-  elements.paymentRecipient.textContent = merchant.recipient;
-  updateExtractedDetails();
 }
 
 function receiptText() {
@@ -263,9 +245,9 @@ function runAnalysis() {
   state.extracted = parseRequest(elements.requestText.value);
   state.selectedMerchantId = rankMerchant(state.extracted);
 
-  elements.overallStatus.textContent = "Request analyzed";
+  elements.overallStatus.textContent = "Analyzed";
   elements.agentState.textContent = "Matching";
-  elements.intentConfidence.textContent = "96% confidence";
+  elements.intentConfidence.textContent = "96%";
   elements.createReservationBtn.disabled = false;
   elements.acceptSlotBtn.disabled = true;
   elements.rejectSlotBtn.disabled = true;
@@ -274,7 +256,7 @@ function runAnalysis() {
   elements.downloadReceiptBtn.disabled = true;
   elements.copySummaryBtn.disabled = true;
   elements.reservationStatus.textContent = "Merchant match ready";
-  elements.reservationSummary.textContent = `Doge selected ${selectedMerchant().name} from the supported Tokyo merchant network.`;
+  elements.reservationSummary.textContent = `Doge selected ${selectedMerchant().name} from supported Tokyo merchants.`;
   elements.merchantDecision.textContent = "Ready to create a pending reservation for merchant review.";
   elements.bookingId.textContent = "Not created";
   elements.txHash.textContent = "No transaction yet";
@@ -284,20 +266,19 @@ function runAnalysis() {
   elements.receiptState.textContent = "Pending";
   elements.receiptBody.textContent = "Complete the flow to generate a confirmed paid booking receipt.";
 
-  updateMerchantDisplay();
+  updateDetails();
   renderMerchants();
   setAgentStage("merchant");
-  setBookingStep(1);
+  setTrackerStep(1);
   addEvent("Intent extracted", `${state.extracted.cuisine}, ${state.extracted.guests} guests, ${state.extracted.time}.`);
   addEvent("Merchant matched", `${selectedMerchant().name} is available at ${selectedMerchant().slot}.`);
-  speak(`I found ${selectedMerchant().name} in Tokyo. I can create a pending reservation for ${selectedMerchant().slot}.`);
+  speak(`I found ${selectedMerchant().name}. I can create a pending reservation for ${selectedMerchant().slot}.`);
 }
 
 function initSpeechRecognition() {
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
   if (!SpeechRecognition) {
-    elements.voiceStatus.textContent = "Browser voice unsupported";
-    elements.voiceBtn.disabled = true;
+    elements.voiceStatus.textContent = "Voice fallback";
     addEvent("Voice fallback ready", "Use Demo Voice or type the request manually.");
     return;
   }
@@ -310,7 +291,7 @@ function initSpeechRecognition() {
   state.recognition.onstart = () => {
     setVoiceState("Listening", true);
     setAgentStage("voice");
-    addEvent("Voice session started", "Listening for the customer booking request.");
+    addEvent("Voice session started", "Listening for a booking request.");
   };
 
   state.recognition.onresult = (event) => {
@@ -318,20 +299,21 @@ function initSpeechRecognition() {
       .map((result) => result[0].transcript)
       .join(" ");
     elements.requestText.value = transcript;
+    elements.quickPrompt.value = transcript;
     if (event.results[event.results.length - 1].isFinal) {
       addEvent("Voice captured", transcript);
-      setVoiceState("Voice captured", false);
+      setVoiceState("Captured", false);
       runAnalysis();
     }
   };
 
   state.recognition.onerror = () => {
-    setVoiceState("Voice error", false);
-    addEvent("Microphone issue", "Use Demo Voice or type the request manually.");
+    setVoiceState("Mic issue", false);
+    addEvent("Microphone issue", "Use Demo Voice or type manually.");
   };
 
   state.recognition.onend = () => {
-    if (state.isListening) setVoiceState("Voice captured", false);
+    if (state.isListening) setVoiceState("Captured", false);
   };
 }
 
@@ -348,10 +330,11 @@ function resetDemo() {
   };
 
   elements.requestText.value = "Hi Doge, book sushi in Tokyo tonight from 7-9 PM for 2 people.";
+  elements.quickPrompt.value = "Book sushi in Tokyo tonight 7-9 PM";
   elements.eventFeed.innerHTML = "";
   elements.overallStatus.textContent = "Ready";
   elements.agentState.textContent = "Idle";
-  elements.intentConfidence.textContent = "92% confidence";
+  elements.intentConfidence.textContent = "92%";
   elements.createReservationBtn.disabled = true;
   elements.acceptSlotBtn.disabled = true;
   elements.rejectSlotBtn.disabled = true;
@@ -359,7 +342,6 @@ function resetDemo() {
   elements.verifyPaymentBtn.disabled = true;
   elements.downloadReceiptBtn.disabled = true;
   elements.copySummaryBtn.disabled = true;
-
   elements.reservationStatus.textContent = "Waiting for request";
   elements.reservationSummary.textContent = "Start with voice or text to create a supported merchant request.";
   elements.merchantDecision.textContent = "Merchant sees a normal booking request. No crypto knowledge is required.";
@@ -371,16 +353,24 @@ function resetDemo() {
   elements.paymentFinalStatus.textContent = "Pending";
   elements.dogeReply.textContent = "Waiting";
 
-  updateMerchantDisplay();
+  updateDetails();
   renderMerchants();
-  setVoiceState(state.recognition ? "Microphone ready" : "Voice fallback ready", false);
+  setVoiceState(state.recognition ? "Mic ready" : "Voice fallback", false);
   setAgentStage("voice");
-  setBookingStep(1);
-  addEvent("System ready", "Voice, merchant, and Mantle proof panels are online.");
+  setTrackerStep(1);
+  addEvent("System ready", "Voice, merchant approval, and Mantle proof modules are online.");
 }
 
+elements.quickPrompt.addEventListener("change", () => {
+  elements.requestText.value = elements.quickPrompt.value;
+});
+
 elements.voiceBtn.addEventListener("click", () => {
-  if (!state.recognition) return;
+  if (!state.recognition) {
+    elements.requestText.value = "Hi Doge, book sushi in Tokyo tonight from 7-9 PM for 2 people.";
+    runAnalysis();
+    return;
+  }
   if (state.isListening) {
     state.recognition.stop();
     setVoiceState("Stopped", false);
@@ -392,7 +382,8 @@ elements.voiceBtn.addEventListener("click", () => {
 elements.demoVoiceBtn.addEventListener("click", () => {
   const demoRequest = "Hi Doge, book sushi in Tokyo tonight from 7 to 9 PM for 2 people.";
   elements.requestText.value = demoRequest;
-  setVoiceState("Demo voice captured", false);
+  elements.quickPrompt.value = demoRequest;
+  setVoiceState("Demo captured", false);
   setAgentStage("intent");
   addEvent("Demo voice captured", demoRequest);
   runAnalysis();
@@ -413,7 +404,7 @@ elements.createReservationBtn.addEventListener("click", () => {
   elements.rejectSlotBtn.disabled = false;
   elements.createReservationBtn.disabled = true;
   setAgentStage("approval");
-  setBookingStep(2);
+  setTrackerStep(2);
   addEvent("Reservation request created", `${state.bookingId} sent to ${merchant.name}.`);
   speak(`I created a pending request for ${merchant.name}. Waiting for merchant confirmation.`);
 });
@@ -429,7 +420,7 @@ elements.rejectSlotBtn.addEventListener("click", () => {
   elements.rejectSlotBtn.disabled = true;
   elements.approvePaymentBtn.disabled = true;
   setAgentStage("merchant");
-  setBookingStep(1);
+  setTrackerStep(1);
   addEvent("Slot rejected", "Doge is ready to suggest another merchant or time.");
   speak("The merchant rejected that slot. I can suggest another supported Tokyo option.");
 });
@@ -444,7 +435,7 @@ elements.acceptSlotBtn.addEventListener("click", () => {
   elements.acceptSlotBtn.disabled = true;
   elements.rejectSlotBtn.disabled = true;
   setAgentStage("payment");
-  setBookingStep(3);
+  setTrackerStep(3);
   addEvent("Merchant accepted", "Mantle deposit request is ready for manual user approval.");
   speak("The merchant accepted the slot. Please approve the Mantle deposit to confirm the booking.");
 });
@@ -475,7 +466,7 @@ elements.verifyPaymentBtn.addEventListener("click", () => {
   elements.paymentFinalStatus.textContent = state.txHash;
   elements.dogeReply.textContent = "Your booking is confirmed";
   elements.receiptBody.textContent = `${state.bookingId} is confirmed for ${merchant.name} at ${merchant.slot}. Mantle payment proof is attached.`;
-  setBookingStep(4);
+  setTrackerStep(4);
   addEvent("Payment verified", `${merchant.deposit} ${merchant.token} verified on Mantle.`);
   addEvent("Booking confirmed", `${state.bookingId} is confirmed and paid.`);
   speak(`Your booking is confirmed. ${merchant.name}, ${merchant.slot}. Mantle payment proof is attached.`);
