@@ -29,6 +29,18 @@ Open `index.html` in a browser.
 
 The prototype is static and has no required dependencies. It simulates the product flow so the team can submit a GitHub repository quickly and continue building after submission.
 
+## What The Prototype Demonstrates
+
+- Natural-language booking request intake.
+- AI-style extraction of cuisine, city, time window, guest count, and deposit.
+- Supported Tokyo merchant selection from a curated partner list.
+- Merchant/admin dashboard acceptance or rejection.
+- Mantle deposit payment request.
+- User-approved wallet transaction simulation.
+- Backend payment verification simulation.
+- Confirmed paid booking receipt with booking ID, tx hash, timestamp, merchant, and deposit details.
+- Downloadable receipt and copyable demo summary.
+
 ## Suggested GitHub Pages Setup
 
 After uploading this folder to GitHub:
@@ -46,7 +58,8 @@ After uploading this folder to GitHub:
 3. Add wallet connection with MetaMask or Reown AppKit.
 4. Verify Mantle transactions with `viem` or `ethers`.
 5. Add merchant authentication for the dashboard.
-6. Generate a real receipt with booking ID, tx hash, and timestamp.
+6. Replace simulated tx hashes with real Mantle transaction checks.
+7. Generate a signed receipt or on-chain receipt record.
 
 ## Repository Structure
 
@@ -57,6 +70,7 @@ After uploading this folder to GitHub:
 |-- app.js
 |-- docs/
 |   |-- flow.md
+|   |-- github-upload.md
 |   |-- requirements.md
 |-- README.md
 ```
