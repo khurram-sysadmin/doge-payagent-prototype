@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Doge PayAgent Prototype</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">Mantle hackathon prototype</p>
+          <h1>Doge PayAgent</h1>
+          <p class="subtitle">
+            Booking and Mantle deposit flow for supported Tokyo merchants.
+          </p>
+        </div>
+        <div class="status-chip" id="overallStatus">Demo ready</div>
+      </header>
+
+      <section class="constraint-bar" aria-label="Key product constraints">
+        <div>Supported Tokyo merchants only</div>
+        <div>No random restaurant automation</div>
+        <div>User approves wallet transaction</div>
+        <div>Mantle verifies deposit proof</div>
+      </section>
+
+      <section class="workspace">
+        <section class="panel user-panel" aria-labelledby="userPanelTitle">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">Phase 1 and 2</p>
+              <h2 id="userPanelTitle">User Request</h2>
+            </div>
+            <span class="phase-pill">Doge Agent</span>
+          </div>
+
+          <label for="requestText">Booking request</label>
+          <textarea id="requestText" rows="4">Hi Doge, book sushi in Tokyo tonight from 7-9 PM for 2 people.</textarea>
+
+          <div class="button-row">
+            <button id="analyzeBtn" class="primary-btn" type="button">
+              Analyze Request
+            </button>
+            <button id="resetBtn" class="secondary-btn" type="button">
+              Reset Demo
+            </button>
+          </div>
+
+          <div class="extract-card" id="extractCard">
+            <h3>Extracted Details</h3>
+            <dl>
+              <div><dt>Cuisine</dt><dd id="detailCuisine">Sushi</dd></div>
+              <div><dt>City</dt><dd id="detailCity">Tokyo</dd></div>
+              <div><dt>Time</dt><dd id="detailTime">7:00 PM - 9:00 PM</dd></div>
+              <div><dt>Guests</dt><dd id="detailGuests">2</dd></div>
+              <div><dt>Deposit</dt><dd id="detailDeposit">12.00 supported token</dd></div>
+            </dl>
+          </div>
+
+          <div class="merchant-card">
+            <div>
+              <p class="eyebrow">Supported merchant</p>
+              <h3>Sakura Sushi Ginza</h3>
+              <p>Tokyo curated partner. Available slot: 7:30 PM.</p>
+            </div>
+            <button id="createReservationBtn" class="primary-btn" type="button" disabled>
+              Create Pending Reservation
+            </button>
+          </div>
+        </section>
+
+        <section class="panel dashboard-panel" aria-labelledby="merchantPanelTitle">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">Phase 3</p>
+              <h2 id="merchantPanelTitle">Merchant Dashboard</h2>
+            </div>
+            <span class="phase-pill orange">Merchant Confirmation</span>
+          </div>
+
+          <div class="reservation-ticket" id="reservationTicket">
+            <p class="ticket-label">Reservation status</p>
+            <h3 id="reservationStatus">Waiting for user request</h3>
+            <p id="reservationSummary">Create a pending reservation to send it to the merchant dashboard.</p>
+          </div>
+
+          <div class="button-row">
+            <button id="acceptSlotBtn" class="primary-btn" type="button" disabled>
+              Accept Slot
+            </button>
+            <button id="rejectSlotBtn" class="secondary-btn" type="button" disabled>
+              Reject Slot
+            </button>
+          </div>
+
+          <div class="decision-note" id="merchantDecision">
+            The merchant sees a normal reservation request. No crypto knowledge is required.
+          </div>
+        </section>
+
+        <section class="panel payment-panel" aria-labelledby="paymentPanelTitle">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">Phase 4</p>
+              <h2 id="paymentPanelTitle">Mantle Deposit Payment</h2>
+            </div>
+            <span class="phase-pill green">Payment Proof</span>
+          </div>
+
+          <div class="payment-box">
+            <dl>
+              <div><dt>Booking ID</dt><dd id="bookingId">Not created</dd></div>
+              <div><dt>Deposit</dt><dd>12.00 supported token</dd></div>
+              <div><dt>Network</dt><dd>Mantle</dd></div>
+              <div><dt>Recipient</dt><dd>Demo merchant escrow</dd></div>
+            </dl>
+          </div>
+
+          <div class="button-row">
+            <button id="approvePaymentBtn" class="primary-btn" type="button" disabled>
+              Approve Wallet Transaction
+            </button>
+            <button id="verifyPaymentBtn" class="secondary-btn" type="button" disabled>
+              Verify Payment
+            </button>
+          </div>
+
+          <div class="tx-card" id="txCard">
+            <p class="ticket-label">Mantle proof</p>
+            <code id="txHash">No transaction yet</code>
+          </div>
+        </section>
+      </section>
+
+      <section class="confirmation-area">
+        <div class="timeline" aria-label="Prototype timeline">
+          <div class="step active" data-step="1">
+            <span>1</span>
+            <p>User request</p>
+          </div>
+          <div class="step" data-step="2">
+            <span>2</span>
+            <p>Doge agent</p>
+          </div>
+          <div class="step" data-step="3">
+            <span>3</span>
+            <p>Merchant accepts</p>
+          </div>
+          <div class="step" data-step="4">
+            <span>4</span>
+            <p>Mantle payment</p>
+          </div>
+          <div class="step" data-step="5">
+            <span>5</span>
+            <p>Booking confirmed</p>
+          </div>
+        </div>
+
+        <article class="receipt" id="receipt">
+          <p class="eyebrow">Phase 5</p>
+          <h2>Booking Confirmation</h2>
+          <p id="receiptBody">
+            Complete the flow to generate a confirmed paid booking receipt.
+          </p>
+          <div class="receipt-grid">
+            <div>
+              <span>Merchant dashboard</span>
+              <strong id="merchantFinalStatus">Pending</strong>
+            </div>
+            <div>
+              <span>Payment proof</span>
+              <strong id="paymentFinalStatus">Pending</strong>
+            </div>
+            <div>
+              <span>Doge reply</span>
+              <strong id="dogeReply">Waiting</strong>
+            </div>
+          </div>
+        </article>
+      </section>
+
+      <footer class="footer-note">
+        Doge turns user intent into a confirmed Tokyo booking, while Mantle provides verifiable payment proof for the reservation deposit.
+      </footer>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>
