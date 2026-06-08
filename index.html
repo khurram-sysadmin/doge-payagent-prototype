@@ -9,21 +9,39 @@
   <body>
     <main class="app-shell">
       <header class="topbar">
-        <div>
-          <p class="eyebrow">Mantle hackathon prototype</p>
-          <h1>Doge PayAgent</h1>
-          <p class="subtitle">
-            Booking and Mantle deposit flow for supported Tokyo merchants.
-          </p>
+        <div class="brand-lockup">
+          <div class="brand-mark" aria-hidden="true">DP</div>
+          <div>
+            <p class="eyebrow">Mantle hackathon prototype</p>
+            <h1>Doge PayAgent</h1>
+            <p class="subtitle">
+              AI booking workflow with merchant confirmation and Mantle payment proof for supported Tokyo merchants.
+            </p>
+          </div>
         </div>
-        <div class="status-chip" id="overallStatus">Demo ready</div>
+        <aside class="hero-console" aria-label="Prototype status">
+          <div class="status-chip" id="overallStatus">Demo ready</div>
+          <dl>
+            <div><dt>Network</dt><dd>Mantle</dd></div>
+            <div><dt>Scope</dt><dd>Tokyo partners</dd></div>
+            <div><dt>Mode</dt><dd>Prototype</dd></div>
+          </dl>
+        </aside>
       </header>
 
       <section class="constraint-bar" aria-label="Key product constraints">
-        <div>Supported Tokyo merchants only</div>
-        <div>No random restaurant automation</div>
-        <div>User approves wallet transaction</div>
-        <div>Mantle verifies deposit proof</div>
+        <div><strong>Supported merchants</strong><span>Curated Tokyo partners only</span></div>
+        <div><strong>Controlled booking</strong><span>No random restaurant automation</span></div>
+        <div><strong>User approval</strong><span>Wallet transaction is manual</span></div>
+        <div><strong>Mantle proof</strong><span>Deposit verification layer</span></div>
+      </section>
+
+      <section class="system-strip" aria-label="System architecture">
+        <span>User voice/chat</span>
+        <span>Doge AI agent</span>
+        <span>Merchant dashboard</span>
+        <span>Mantle payment proof</span>
+        <span>Confirmed booking</span>
       </section>
 
       <section class="workspace">
@@ -59,11 +77,24 @@
             </dl>
           </div>
 
+          <div class="merchant-section">
+            <div class="section-title-row">
+              <h3>Supported Tokyo Merchants</h3>
+              <span id="merchantCount">3 demo partners</span>
+            </div>
+            <div class="merchant-list" id="merchantList" aria-label="Supported merchants"></div>
+          </div>
+
           <div class="merchant-card">
             <div>
               <p class="eyebrow">Supported merchant</p>
-              <h3>Sakura Sushi Ginza</h3>
-              <p>Tokyo curated partner. Available slot: 7:30 PM.</p>
+              <h3 id="selectedMerchantName">Sakura Sushi Ginza</h3>
+              <p id="selectedMerchantDescription">Tokyo curated partner. Available slot: 7:30 PM.</p>
+              <div class="merchant-metrics">
+                <span id="selectedMerchantArea">Ginza</span>
+                <span id="selectedMerchantSlot">7:30 PM</span>
+                <span id="selectedMerchantDeposit">12.00 token</span>
+              </div>
             </div>
             <button id="createReservationBtn" class="primary-btn" type="button" disabled>
               Create Pending Reservation
@@ -112,9 +143,10 @@
           <div class="payment-box">
             <dl>
               <div><dt>Booking ID</dt><dd id="bookingId">Not created</dd></div>
-              <div><dt>Deposit</dt><dd>12.00 supported token</dd></div>
-              <div><dt>Network</dt><dd>Mantle</dd></div>
-              <div><dt>Recipient</dt><dd>Demo merchant escrow</dd></div>
+              <div><dt>Deposit</dt><dd id="paymentDeposit">12.00 supported token</dd></div>
+              <div><dt>Token</dt><dd id="paymentToken">Supported stable token</dd></div>
+              <div><dt>Network</dt><dd id="paymentNetwork">Mantle</dd></div>
+              <div><dt>Recipient</dt><dd id="paymentRecipient">Demo merchant escrow</dd></div>
             </dl>
           </div>
 
@@ -130,6 +162,15 @@
           <div class="tx-card" id="txCard">
             <p class="ticket-label">Mantle proof</p>
             <code id="txHash">No transaction yet</code>
+          </div>
+
+          <div class="preflight-card">
+            <p class="ticket-label">Agent payment guardrails</p>
+            <ul id="paymentGuardrails">
+              <li>Merchant must confirm the slot before payment.</li>
+              <li>User manually approves the wallet transaction.</li>
+              <li>Backend checks amount, token, recipient, and tx hash.</li>
+            </ul>
           </div>
         </section>
       </section>
@@ -177,6 +218,14 @@
               <span>Doge reply</span>
               <strong id="dogeReply">Waiting</strong>
             </div>
+          </div>
+          <div class="button-row receipt-actions">
+            <button id="downloadReceiptBtn" class="secondary-btn" type="button" disabled>
+              Download Receipt
+            </button>
+            <button id="copySummaryBtn" class="secondary-btn" type="button" disabled>
+              Copy Demo Summary
+            </button>
           </div>
         </article>
       </section>
