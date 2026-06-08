@@ -8,7 +8,7 @@ const merchants = [
     deposit: "12.00",
     token: "Supported stable token",
     recipient: "0x7a90...D0GE",
-    description: "Curated Tokyo partner with a 7:30 PM table for 2.",
+    description: "Premium sushi partner with a 7:30 PM table for 2.",
   },
   {
     id: "shibuya-ramen-house",
@@ -19,7 +19,7 @@ const merchants = [
     deposit: "8.00",
     token: "Supported stable token",
     recipient: "0x4b18...TYO1",
-    description: "Casual supported merchant with quick evening availability.",
+    description: "Fast casual Tokyo partner with evening availability.",
   },
   {
     id: "asakusa-izakaya-lab",
@@ -30,7 +30,7 @@ const merchants = [
     deposit: "10.00",
     token: "Supported stable token",
     recipient: "0x91c2...TYO2",
-    description: "Demo partner for group-friendly local service bookings.",
+    description: "Group-friendly partner for local service booking demos.",
   },
 ];
 
@@ -40,6 +40,8 @@ const state = {
   timestamp: "",
   step: 1,
   selectedMerchantId: merchants[0].id,
+  recognition: null,
+  isListening: false,
   extracted: {
     cuisine: "Sushi",
     city: "Tokyo",
@@ -51,6 +53,11 @@ const state = {
 const elements = {
   overallStatus: document.getElementById("overallStatus"),
   requestText: document.getElementById("requestText"),
+  voiceBtn: document.getElementById("voiceBtn"),
+  demoVoiceBtn: document.getElementById("demoVoiceBtn"),
+  voiceStatus: document.getElementById("voiceStatus"),
+  voiceOrb: document.getElementById("voiceOrb"),
+  speakReplyToggle: document.getElementById("speakReplyToggle"),
   analyzeBtn: document.getElementById("analyzeBtn"),
   resetBtn: document.getElementById("resetBtn"),
   createReservationBtn: document.getElementById("createReservationBtn"),
@@ -62,6 +69,7 @@ const elements = {
   copySummaryBtn: document.getElementById("copySummaryBtn"),
   merchantList: document.getElementById("merchantList"),
   merchantCount: document.getElementById("merchantCount"),
+  intentConfidence: document.getElementById("intentConfidence"),
   detailCuisine: document.getElementById("detailCuisine"),
   detailCity: document.getElementById("detailCity"),
   detailTime: document.getElementById("detailTime"),
@@ -72,6 +80,9 @@ const elements = {
   selectedMerchantArea: document.getElementById("selectedMerchantArea"),
   selectedMerchantSlot: document.getElementById("selectedMerchantSlot"),
   selectedMerchantDeposit: document.getElementById("selectedMerchantDeposit"),
+  agentState: document.getElementById("agentState"),
+  agentSteps: Array.from(document.querySelectorAll(".rail-step")),
+  eventFeed: document.getElementById("eventFeed"),
   reservationStatus: document.getElementById("reservationStatus"),
   reservationSummary: document.getElementById("reservationSummary"),
   merchantDecision: document.getElementById("merchantDecision"),
@@ -81,20 +92,54 @@ const elements = {
   paymentNetwork: document.getElementById("paymentNetwork"),
   paymentRecipient: document.getElementById("paymentRecipient"),
   txHash: document.getElementById("txHash"),
+  receiptState: document.getElementById("receiptState"),
   receiptBody: document.getElementById("receiptBody"),
   merchantFinalStatus: document.getElementById("merchantFinalStatus"),
   paymentFinalStatus: document.getElementById("paymentFinalStatus"),
   dogeReply: document.getElementById("dogeReply"),
-  steps: Array.from(document.querySelectorAll(".step")),
+  ladderSteps: Array.from(document.querySelectorAll(".ladder-step")),
 };
 
 function selectedMerchant() {
   return merchants.find((merchant) => merchant.id === state.selectedMerchantId) || merchants[0];
 }
 
-function setStep(step) {
+function addEvent(title, body) {
+  const item = document.createElement("div");
+  item.className = "feed-item";
+  item.innerHTML = `<strong>${title}</strong><span>${body}</span>`;
+  elements.eventFeed.prepend(item);
+}
+
+function speak(message) {
+  if (!elements.speakReplyToggle.checked || !("speechSynthesis" in window)) return;
+  window.speechSynthesis.cancel();
+  const utterance = new SpeechSynthesisUtterance(message);
+  utterance.rate = 1;
+  utterance.pitch = 1;
+  window.speechSynthesis.speak(utterance);
+}
+
+function setVoiceState(status, listening = false) {
+  state.isListening = listening;
+  elements.voiceStatus.textContent = status;
+  elements.voiceOrb.classList.toggle("listening", listening);
+  elements.voiceBtn.textContent = listening ? "Listening..." : "Start Voice Request";
+}
+
+function setAgentStage(stage) {
+  const order = ["voice", "intent", "merchant", "approval", "payment"];
+  const currentIndex = order.indexOf(stage);
+  elements.agentSteps.forEach((step) => {
+    const stepIndex = order.indexOf(step.dataset.agentStep);
+    step.classList.toggle("complete", currentIndex > stepIndex);
+    step.classList.toggle("active", currentIndex === stepIndex);
+  });
+}
+
+function setBookingStep(step) {
   state.step = step;
-  elements.steps.forEach((item) => {
+  elements.ladderSteps.forEach((item) => {
     const itemStep = Number(item.dataset.step);
     item.classList.toggle("complete", itemStep < step);
     item.classList.toggle("active", itemStep === step);
@@ -128,16 +173,10 @@ function parseRequest(text) {
   const guestsMatch = lower.match(/for\s+(\d+)\s*(people|guests|person)?/);
   const guests = guestsMatch ? guestsMatch[1] : "2";
 
-  const time = lower.includes("8")
-    ? "7:00 PM - 9:00 PM"
-    : lower.includes("7")
-      ? "7:00 PM - 9:00 PM"
-      : "Tonight";
-
   return {
     cuisine,
-    city: lower.includes("tokyo") ? "Tokyo" : "Tokyo",
-    time,
+    city: "Tokyo",
+    time: "7:00 PM - 9:00 PM",
     guests,
   };
 }
@@ -148,7 +187,7 @@ function rankMerchant(extracted) {
 }
 
 function renderMerchants() {
-  elements.merchantCount.textContent = `${merchants.length} demo partners`;
+  elements.merchantCount.textContent = `${merchants.length} partners`;
   elements.merchantList.innerHTML = "";
 
   merchants.forEach((merchant) => {
@@ -158,15 +197,17 @@ function renderMerchants() {
     option.classList.toggle("selected", merchant.id === state.selectedMerchantId);
     option.innerHTML = `
       <strong>${merchant.name}</strong>
-      <span>${merchant.area} | ${merchant.cuisine} | ${merchant.slot} | ${merchant.deposit} token deposit</span>
+      <span>${merchant.area} | ${merchant.cuisine} | ${merchant.slot}</span>
+      <em>${merchant.deposit} token deposit</em>
     `;
     option.addEventListener("click", () => {
       state.selectedMerchantId = merchant.id;
       updateMerchantDisplay();
       renderMerchants();
-      if (state.step >= 2 && !state.bookingId) {
+      if (state.step >= 1 && !state.bookingId) {
         elements.createReservationBtn.disabled = false;
       }
+      addEvent("Merchant selected", `${merchant.name} is now the active booking target.`);
     });
     elements.merchantList.appendChild(option);
   });
@@ -215,6 +256,85 @@ function receiptText() {
   ].join("\n");
 }
 
+function runAnalysis() {
+  state.bookingId = "";
+  state.txHash = "";
+  state.timestamp = "";
+  state.extracted = parseRequest(elements.requestText.value);
+  state.selectedMerchantId = rankMerchant(state.extracted);
+
+  elements.overallStatus.textContent = "Request analyzed";
+  elements.agentState.textContent = "Matching";
+  elements.intentConfidence.textContent = "96% confidence";
+  elements.createReservationBtn.disabled = false;
+  elements.acceptSlotBtn.disabled = true;
+  elements.rejectSlotBtn.disabled = true;
+  elements.approvePaymentBtn.disabled = true;
+  elements.verifyPaymentBtn.disabled = true;
+  elements.downloadReceiptBtn.disabled = true;
+  elements.copySummaryBtn.disabled = true;
+  elements.reservationStatus.textContent = "Merchant match ready";
+  elements.reservationSummary.textContent = `Doge selected ${selectedMerchant().name} from the supported Tokyo merchant network.`;
+  elements.merchantDecision.textContent = "Ready to create a pending reservation for merchant review.";
+  elements.bookingId.textContent = "Not created";
+  elements.txHash.textContent = "No transaction yet";
+  elements.merchantFinalStatus.textContent = "Pending";
+  elements.paymentFinalStatus.textContent = "Pending";
+  elements.dogeReply.textContent = "Waiting";
+  elements.receiptState.textContent = "Pending";
+  elements.receiptBody.textContent = "Complete the flow to generate a confirmed paid booking receipt.";
+
+  updateMerchantDisplay();
+  renderMerchants();
+  setAgentStage("merchant");
+  setBookingStep(1);
+  addEvent("Intent extracted", `${state.extracted.cuisine}, ${state.extracted.guests} guests, ${state.extracted.time}.`);
+  addEvent("Merchant matched", `${selectedMerchant().name} is available at ${selectedMerchant().slot}.`);
+  speak(`I found ${selectedMerchant().name} in Tokyo. I can create a pending reservation for ${selectedMerchant().slot}.`);
+}
+
+function initSpeechRecognition() {
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRecognition) {
+    elements.voiceStatus.textContent = "Browser voice unsupported";
+    elements.voiceBtn.disabled = true;
+    addEvent("Voice fallback ready", "Use Demo Voice or type the request manually.");
+    return;
+  }
+
+  state.recognition = new SpeechRecognition();
+  state.recognition.lang = "en-US";
+  state.recognition.interimResults = true;
+  state.recognition.continuous = false;
+
+  state.recognition.onstart = () => {
+    setVoiceState("Listening", true);
+    setAgentStage("voice");
+    addEvent("Voice session started", "Listening for the customer booking request.");
+  };
+
+  state.recognition.onresult = (event) => {
+    const transcript = Array.from(event.results)
+      .map((result) => result[0].transcript)
+      .join(" ");
+    elements.requestText.value = transcript;
+    if (event.results[event.results.length - 1].isFinal) {
+      addEvent("Voice captured", transcript);
+      setVoiceState("Voice captured", false);
+      runAnalysis();
+    }
+  };
+
+  state.recognition.onerror = () => {
+    setVoiceState("Voice error", false);
+    addEvent("Microphone issue", "Use Demo Voice or type the request manually.");
+  };
+
+  state.recognition.onend = () => {
+    if (state.isListening) setVoiceState("Voice captured", false);
+  };
+}
+
 function resetDemo() {
   state.bookingId = "";
   state.txHash = "";
@@ -228,7 +348,10 @@ function resetDemo() {
   };
 
   elements.requestText.value = "Hi Doge, book sushi in Tokyo tonight from 7-9 PM for 2 people.";
-  elements.overallStatus.textContent = "Demo ready";
+  elements.eventFeed.innerHTML = "";
+  elements.overallStatus.textContent = "Ready";
+  elements.agentState.textContent = "Idle";
+  elements.intentConfidence.textContent = "92% confidence";
   elements.createReservationBtn.disabled = true;
   elements.acceptSlotBtn.disabled = true;
   elements.rejectSlotBtn.disabled = true;
@@ -237,11 +360,12 @@ function resetDemo() {
   elements.downloadReceiptBtn.disabled = true;
   elements.copySummaryBtn.disabled = true;
 
-  elements.reservationStatus.textContent = "Waiting for user request";
-  elements.reservationSummary.textContent = "Create a pending reservation to send it to the merchant dashboard.";
-  elements.merchantDecision.textContent = "The merchant sees a normal reservation request. No crypto knowledge is required.";
+  elements.reservationStatus.textContent = "Waiting for request";
+  elements.reservationSummary.textContent = "Start with voice or text to create a supported merchant request.";
+  elements.merchantDecision.textContent = "Merchant sees a normal booking request. No crypto knowledge is required.";
   elements.bookingId.textContent = "Not created";
   elements.txHash.textContent = "No transaction yet";
+  elements.receiptState.textContent = "Pending";
   elements.receiptBody.textContent = "Complete the flow to generate a confirmed paid booking receipt.";
   elements.merchantFinalStatus.textContent = "Pending";
   elements.paymentFinalStatus.textContent = "Pending";
@@ -249,55 +373,54 @@ function resetDemo() {
 
   updateMerchantDisplay();
   renderMerchants();
-  setStep(1);
+  setVoiceState(state.recognition ? "Microphone ready" : "Voice fallback ready", false);
+  setAgentStage("voice");
+  setBookingStep(1);
+  addEvent("System ready", "Voice, merchant, and Mantle proof panels are online.");
 }
 
-elements.analyzeBtn.addEventListener("click", () => {
-  state.bookingId = "";
-  state.txHash = "";
-  state.timestamp = "";
-  state.extracted = parseRequest(elements.requestText.value);
-  state.selectedMerchantId = rankMerchant(state.extracted);
-
-  elements.overallStatus.textContent = "Request analyzed";
-  elements.createReservationBtn.disabled = false;
-  elements.acceptSlotBtn.disabled = true;
-  elements.rejectSlotBtn.disabled = true;
-  elements.approvePaymentBtn.disabled = true;
-  elements.verifyPaymentBtn.disabled = true;
-  elements.downloadReceiptBtn.disabled = true;
-  elements.copySummaryBtn.disabled = true;
-  elements.reservationStatus.textContent = "Details extracted";
-  elements.reservationSummary.textContent = `Doge selected ${selectedMerchant().name} from the supported Tokyo merchant set.`;
-  elements.merchantDecision.textContent = "Ready to create a pending reservation for merchant review.";
-  elements.bookingId.textContent = "Not created";
-  elements.txHash.textContent = "No transaction yet";
-  elements.merchantFinalStatus.textContent = "Pending";
-  elements.paymentFinalStatus.textContent = "Pending";
-  elements.dogeReply.textContent = "Waiting";
-  elements.receiptBody.textContent = "Complete the flow to generate a confirmed paid booking receipt.";
-
-  updateMerchantDisplay();
-  renderMerchants();
-  setStep(2);
+elements.voiceBtn.addEventListener("click", () => {
+  if (!state.recognition) return;
+  if (state.isListening) {
+    state.recognition.stop();
+    setVoiceState("Stopped", false);
+    return;
+  }
+  state.recognition.start();
 });
+
+elements.demoVoiceBtn.addEventListener("click", () => {
+  const demoRequest = "Hi Doge, book sushi in Tokyo tonight from 7 to 9 PM for 2 people.";
+  elements.requestText.value = demoRequest;
+  setVoiceState("Demo voice captured", false);
+  setAgentStage("intent");
+  addEvent("Demo voice captured", demoRequest);
+  runAnalysis();
+});
+
+elements.analyzeBtn.addEventListener("click", runAnalysis);
 
 elements.createReservationBtn.addEventListener("click", () => {
   const merchant = selectedMerchant();
   state.bookingId = makeBookingId();
   elements.bookingId.textContent = state.bookingId;
-  elements.overallStatus.textContent = "Pending merchant confirmation";
+  elements.overallStatus.textContent = "Pending merchant";
+  elements.agentState.textContent = "Merchant review";
   elements.reservationStatus.textContent = "Pending merchant confirmation";
   elements.reservationSummary.textContent = `${state.bookingId}: ${merchant.name}, ${state.extracted.guests} guests, ${merchant.slot}, ${merchant.deposit} token deposit.`;
   elements.merchantDecision.textContent = "Merchant/admin can accept this slot or reject it and trigger another search.";
   elements.acceptSlotBtn.disabled = false;
   elements.rejectSlotBtn.disabled = false;
   elements.createReservationBtn.disabled = true;
-  setStep(3);
+  setAgentStage("approval");
+  setBookingStep(2);
+  addEvent("Reservation request created", `${state.bookingId} sent to ${merchant.name}.`);
+  speak(`I created a pending request for ${merchant.name}. Waiting for merchant confirmation.`);
 });
 
 elements.rejectSlotBtn.addEventListener("click", () => {
   elements.overallStatus.textContent = "Alternative needed";
+  elements.agentState.textContent = "Rematching";
   elements.reservationStatus.textContent = "Slot rejected";
   elements.reservationSummary.textContent = "Doge suggests another time or restaurant and loops back to supported merchant search.";
   elements.merchantDecision.textContent = "Rejected by merchant. Choose another supported Tokyo merchant or time slot.";
@@ -305,43 +428,57 @@ elements.rejectSlotBtn.addEventListener("click", () => {
   elements.acceptSlotBtn.disabled = true;
   elements.rejectSlotBtn.disabled = true;
   elements.approvePaymentBtn.disabled = true;
-  setStep(2);
+  setAgentStage("merchant");
+  setBookingStep(1);
+  addEvent("Slot rejected", "Doge is ready to suggest another merchant or time.");
+  speak("The merchant rejected that slot. I can suggest another supported Tokyo option.");
 });
 
 elements.acceptSlotBtn.addEventListener("click", () => {
   elements.overallStatus.textContent = "Slot accepted";
+  elements.agentState.textContent = "Payment ready";
   elements.reservationStatus.textContent = "Slot accepted";
   elements.reservationSummary.textContent = "Merchant accepted the slot. Doge can now request a Mantle deposit.";
   elements.merchantDecision.textContent = "Accepted by merchant. Payment request is ready for user approval.";
   elements.approvePaymentBtn.disabled = false;
   elements.acceptSlotBtn.disabled = true;
   elements.rejectSlotBtn.disabled = true;
+  setAgentStage("payment");
+  setBookingStep(3);
+  addEvent("Merchant accepted", "Mantle deposit request is ready for manual user approval.");
+  speak("The merchant accepted the slot. Please approve the Mantle deposit to confirm the booking.");
 });
 
 elements.approvePaymentBtn.addEventListener("click", () => {
   state.txHash = makeTxHash();
   elements.txHash.textContent = state.txHash;
-  elements.overallStatus.textContent = "Wallet transaction approved";
+  elements.overallStatus.textContent = "Wallet approved";
   elements.paymentFinalStatus.textContent = "Approval submitted";
   elements.verifyPaymentBtn.disabled = false;
   elements.approvePaymentBtn.disabled = true;
-  setStep(4);
+  addEvent("Wallet transaction approved", state.txHash);
+  speak("Wallet approval submitted. I am ready to verify the Mantle transaction proof.");
 });
 
 elements.verifyPaymentBtn.addEventListener("click", () => {
   const merchant = selectedMerchant();
   state.timestamp = new Date().toISOString();
-  elements.overallStatus.textContent = "Booking confirmed";
+  elements.overallStatus.textContent = "Confirmed";
+  elements.agentState.textContent = "Complete";
   elements.reservationStatus.textContent = "Confirmed and paid";
   elements.reservationSummary.textContent = "The backend verified the Mantle transaction and updated the booking.";
   elements.verifyPaymentBtn.disabled = true;
   elements.downloadReceiptBtn.disabled = false;
   elements.copySummaryBtn.disabled = false;
+  elements.receiptState.textContent = "Confirmed";
   elements.merchantFinalStatus.textContent = "Paid reservation visible";
   elements.paymentFinalStatus.textContent = state.txHash;
   elements.dogeReply.textContent = "Your booking is confirmed";
   elements.receiptBody.textContent = `${state.bookingId} is confirmed for ${merchant.name} at ${merchant.slot}. Mantle payment proof is attached.`;
-  setStep(5);
+  setBookingStep(4);
+  addEvent("Payment verified", `${merchant.deposit} ${merchant.token} verified on Mantle.`);
+  addEvent("Booking confirmed", `${state.bookingId} is confirmed and paid.`);
+  speak(`Your booking is confirmed. ${merchant.name}, ${merchant.slot}. Mantle payment proof is attached.`);
 });
 
 elements.downloadReceiptBtn.addEventListener("click", () => {
@@ -357,9 +494,8 @@ elements.downloadReceiptBtn.addEventListener("click", () => {
 });
 
 elements.copySummaryBtn.addEventListener("click", async () => {
-  const summary = receiptText();
   try {
-    await navigator.clipboard.writeText(summary);
+    await navigator.clipboard.writeText(receiptText());
     elements.overallStatus.textContent = "Summary copied";
   } catch {
     elements.overallStatus.textContent = "Copy unavailable";
@@ -368,4 +504,5 @@ elements.copySummaryBtn.addEventListener("click", async () => {
 
 elements.resetBtn.addEventListener("click", resetDemo);
 
+initSpeechRecognition();
 resetDemo();
