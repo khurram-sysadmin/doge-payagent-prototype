@@ -1,13 +1,13 @@
 :root {
   --bg: #070a0f;
   --surface: #0d131c;
-  --surface-2: #111a26;
+  --surface-2: #101823;
   --surface-3: #141f2d;
   --ink: #eef5ff;
-  --muted: #94a3b8;
-  --soft: #c6d3e1;
-  --line: #253244;
-  --line-strong: #36506c;
+  --muted: #93a4b8;
+  --soft: #c9d6e5;
+  --line: #263548;
+  --line-strong: #38506a;
   --cyan: #38bdf8;
   --cyan-weak: rgba(56, 189, 248, 0.14);
   --green: #2dd4bf;
@@ -17,7 +17,8 @@
   --violet: #a78bfa;
   --violet-weak: rgba(167, 139, 250, 0.14);
   --danger: #fb7185;
-  --shadow: 0 28px 80px rgba(0, 0, 0, 0.4);
+  --danger-weak: rgba(251, 113, 133, 0.12);
+  --shadow: 0 28px 80px rgba(0, 0, 0, 0.42);
 }
 
 * {
@@ -30,8 +31,8 @@ body {
   color: var(--ink);
   background-color: var(--bg);
   background-image:
-    linear-gradient(rgba(148, 163, 184, 0.07) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(148, 163, 184, 0.07) 1px, transparent 1px);
+    linear-gradient(rgba(148, 163, 184, 0.065) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(148, 163, 184, 0.065) 1px, transparent 1px);
   background-size: 42px 42px;
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
@@ -53,7 +54,7 @@ button:disabled {
 }
 
 .app-shell {
-  width: min(1240px, calc(100% - 32px));
+  width: min(1320px, calc(100% - 32px));
   margin: 24px auto 32px;
 }
 
@@ -64,7 +65,7 @@ button:disabled {
   gap: 24px;
   padding: 26px;
   background:
-    linear-gradient(135deg, rgba(56, 189, 248, 0.13), transparent 42%),
+    linear-gradient(135deg, rgba(56, 189, 248, 0.14), transparent 42%),
     linear-gradient(225deg, rgba(45, 212, 191, 0.1), transparent 44%),
     var(--surface);
   border: 1px solid var(--line-strong);
@@ -129,7 +130,7 @@ h3 {
 }
 
 .subtitle {
-  max-width: 720px;
+  max-width: 760px;
   margin-bottom: 0;
   color: var(--soft);
   font-size: 16px;
@@ -139,9 +140,9 @@ h3 {
 .hero-console {
   display: grid;
   align-content: space-between;
-  min-width: 240px;
+  min-width: 250px;
   padding: 16px;
-  background: rgba(7, 10, 15, 0.56);
+  background: rgba(7, 10, 15, 0.58);
   border: 1px solid var(--line);
   border-radius: 8px;
 }
@@ -234,16 +235,15 @@ h3 {
   text-align: center;
 }
 
-.workspace {
+.dashboard-grid {
   display: grid;
-  grid-template-columns: 1.12fr 0.88fr 0.94fr;
+  grid-template-columns: minmax(320px, 1.15fr) minmax(300px, 0.95fr) minmax(320px, 1fr);
   gap: 16px;
+  align-items: stretch;
 }
 
 .panel,
-.receipt,
-.footer-note,
-.timeline {
+.footer-note {
   background: rgba(13, 19, 28, 0.94);
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -254,8 +254,18 @@ h3 {
   display: flex;
   flex-direction: column;
   gap: 16px;
-  min-height: 560px;
+  min-height: 440px;
   padding: 20px;
+}
+
+.voice-panel,
+.merchant-panel,
+.payment-panel {
+  min-height: 620px;
+}
+
+.receipt-panel {
+  grid-column: span 2;
 }
 
 .panel-heading {
@@ -290,6 +300,68 @@ textarea:focus {
   box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.14);
 }
 
+.voice-orb {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: 152px;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at center, rgba(56, 189, 248, 0.2), transparent 36%),
+    #0a1018;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.orb-core {
+  width: 72px;
+  height: 72px;
+  background: linear-gradient(135deg, var(--cyan), var(--green));
+  border-radius: 50%;
+  box-shadow: 0 0 44px rgba(56, 189, 248, 0.35);
+}
+
+.voice-orb.listening .orb-core {
+  animation: pulseCore 1.2s ease-in-out infinite;
+}
+
+.wave-bars {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.wave-bars span {
+  width: 5px;
+  height: 28px;
+  background: rgba(238, 245, 255, 0.72);
+  border-radius: 99px;
+  transform-origin: center;
+}
+
+.voice-orb.listening .wave-bars span {
+  animation: voiceBar 0.9s ease-in-out infinite;
+}
+
+.wave-bars span:nth-child(2) { animation-delay: 0.08s; }
+.wave-bars span:nth-child(3) { animation-delay: 0.16s; }
+.wave-bars span:nth-child(4) { animation-delay: 0.24s; }
+.wave-bars span:nth-child(5) { animation-delay: 0.32s; }
+
+.voice-toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 40px;
+  padding: 10px 12px;
+  color: var(--soft);
+  background: #0a1018;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  text-transform: none;
+}
+
 .button-row {
   display: flex;
   flex-wrap: wrap;
@@ -319,14 +391,17 @@ textarea:focus {
   border-color: var(--cyan);
 }
 
+.full-width {
+  width: 100%;
+}
+
 .extract-card,
-.merchant-card,
-.reservation-ticket,
+.selected-merchant,
+.booking-status-card,
 .payment-box,
 .tx-card,
 .decision-note,
-.preflight-card,
-.merchant-section {
+.preflight-card {
   padding: 16px;
   background: #0a1018;
   border: 1px solid var(--line);
@@ -358,8 +433,8 @@ textarea:focus {
 
 .merchant-option {
   width: 100%;
-  min-height: 82px;
-  padding: 12px;
+  min-height: 92px;
+  padding: 13px;
   color: var(--ink);
   background: #0d151f;
   border: 1px solid var(--line);
@@ -373,7 +448,8 @@ textarea:focus {
 }
 
 .merchant-option strong,
-.merchant-option span {
+.merchant-option span,
+.merchant-option em {
   display: block;
 }
 
@@ -383,18 +459,16 @@ textarea:focus {
   font-size: 14px;
 }
 
-.merchant-option span {
+.merchant-option span,
+.merchant-option em {
   color: var(--muted);
   font-size: 12px;
+  font-style: normal;
   font-weight: 800;
   line-height: 1.35;
 }
 
-.merchant-card {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
+.selected-merchant {
   margin-top: auto;
   background: var(--green-weak);
   border-color: rgba(45, 212, 191, 0.36);
@@ -404,7 +478,7 @@ textarea:focus {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  margin-top: 12px;
+  margin: 12px 0 16px;
 }
 
 .merchant-metrics span {
@@ -451,14 +525,14 @@ dd {
   text-transform: uppercase;
 }
 
-.reservation-ticket h3 {
+.booking-status-card h3 {
   margin-bottom: 10px;
   font-size: 23px;
 }
 
-.reservation-ticket p,
-.merchant-card p,
-.receipt p,
+.booking-status-card p,
+.selected-merchant p,
+.receipt-panel p,
 .decision-note {
   color: var(--soft);
   line-height: 1.5;
@@ -499,62 +573,141 @@ dd {
   line-height: 1.45;
 }
 
-.confirmation-area {
+.timeline-rail {
   display: grid;
-  grid-template-columns: 0.96fr 1.04fr;
-  gap: 16px;
-  margin-top: 16px;
+  gap: 12px;
 }
 
-.timeline {
+.rail-step {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 1px;
-  padding: 1px;
-  overflow: hidden;
+  grid-template-columns: 30px 1fr;
+  gap: 12px;
+  padding: 12px;
+  background: #0a1018;
+  border: 1px solid var(--line);
+  border-radius: 8px;
 }
 
-.step {
-  min-height: 104px;
-  padding: 14px;
-  background: #0d151f;
-  border: 0;
-}
-
-.step span {
-  display: inline-grid;
-  place-items: center;
+.rail-step > span {
   width: 30px;
   height: 30px;
-  margin-bottom: 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: 50%;
+  background: #101826;
+}
+
+.rail-step.active {
+  border-color: var(--cyan);
+}
+
+.rail-step.active > span {
+  background: var(--cyan);
+  box-shadow: 0 0 24px rgba(56, 189, 248, 0.36);
+}
+
+.rail-step.complete {
+  border-color: rgba(45, 212, 191, 0.42);
+}
+
+.rail-step.complete > span {
+  background: var(--green);
+}
+
+.rail-step strong {
+  display: block;
+  margin-bottom: 4px;
+}
+
+.rail-step p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.35;
+}
+
+.event-feed {
+  display: grid;
+  align-content: start;
+  gap: 10px;
+  min-height: 190px;
+  max-height: 280px;
+  overflow: auto;
+  padding-right: 4px;
+}
+
+.feed-item {
+  padding: 11px 12px;
+  background: #0a1018;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  animation: feedIn 0.35s ease-out;
+}
+
+.feed-item strong,
+.feed-item span {
+  display: block;
+}
+
+.feed-item strong {
+  margin-bottom: 4px;
+  color: var(--ink);
+  font-size: 13px;
+}
+
+.feed-item span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.4;
+}
+
+.progress-ladder {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.ladder-step {
+  min-height: 82px;
+  padding: 11px;
+  background: #0a1018;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.ladder-step span {
+  display: inline-grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  margin-bottom: 9px;
   color: #071017;
   background: var(--muted);
   border-radius: 6px;
   font-weight: 950;
 }
 
-.step.active span {
+.ladder-step.active {
+  border-color: var(--cyan);
+}
+
+.ladder-step.active span {
   background: var(--cyan);
 }
 
-.step.complete {
+.ladder-step.complete {
   background: rgba(45, 212, 191, 0.09);
 }
 
-.step.complete span {
+.ladder-step.complete span {
   background: var(--green);
 }
 
-.step p {
-  margin-bottom: 0;
+.ladder-step p {
+  margin: 0;
   color: var(--soft);
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 900;
-  line-height: 1.35;
-}
-
-.receipt {
-  padding: 20px;
 }
 
 .receipt-grid {
@@ -565,7 +718,7 @@ dd {
 }
 
 .receipt-grid div {
-  min-height: 88px;
+  min-height: 92px;
   padding: 13px;
   background: #0a1018;
   border: 1px solid var(--line);
@@ -602,10 +755,24 @@ dd {
   text-align: center;
 }
 
-@media (max-width: 1080px) {
+@keyframes pulseCore {
+  0%, 100% { transform: scale(1); opacity: 0.92; }
+  50% { transform: scale(1.08); opacity: 1; }
+}
+
+@keyframes voiceBar {
+  0%, 100% { transform: scaleY(0.58); }
+  50% { transform: scaleY(1.55); }
+}
+
+@keyframes feedIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 1160px) {
   .topbar,
-  .workspace,
-  .confirmation-area {
+  .dashboard-grid {
     grid-template-columns: 1fr;
   }
 
@@ -619,25 +786,30 @@ dd {
 
   .constraint-bar,
   .system-strip,
-  .timeline,
   .receipt-grid {
     grid-template-columns: 1fr;
   }
 
-  .panel {
+  .panel,
+  .voice-panel,
+  .merchant-panel,
+  .payment-panel {
     min-height: unset;
+  }
+
+  .receipt-panel {
+    grid-column: auto;
   }
 }
 
-@media (max-width: 640px) {
+@media (max-width: 680px) {
   .app-shell {
-    width: min(100% - 20px, 1240px);
+    width: min(100% - 20px, 1320px);
     margin-top: 10px;
   }
 
   .topbar,
-  .panel,
-  .receipt {
+  .panel {
     padding: 16px;
   }
 
@@ -656,8 +828,7 @@ dd {
     font-size: 36px;
   }
 
-  .merchant-card {
-    align-items: flex-start;
-    flex-direction: column;
+  .progress-ladder {
+    grid-template-columns: 1fr 1fr;
   }
 }

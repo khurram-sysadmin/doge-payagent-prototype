@@ -32,6 +32,7 @@ The prototype is static and has no required dependencies. It simulates the produ
 ## What The Prototype Demonstrates
 
 - Natural-language booking request intake.
+- Browser microphone voice request demo with text fallback.
 - AI-style extraction of cuisine, city, time window, guest count, and deposit.
 - Supported Tokyo merchant selection from a curated partner list.
 - Merchant/admin dashboard acceptance or rejection.
@@ -40,6 +41,7 @@ The prototype is static and has no required dependencies. It simulates the produ
 - Backend payment verification simulation.
 - Confirmed paid booking receipt with booking ID, tx hash, timestamp, merchant, and deposit details.
 - Downloadable receipt and copyable demo summary.
+- Spoken booking updates using the browser speech engine when available.
 
 ## Suggested GitHub Pages Setup
 
