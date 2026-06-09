@@ -1,26 +1,26 @@
 # Doge PayAgent Prototype
 
-Doge PayAgent is a hackathon prototype for booking supported Tokyo merchants and confirming deposits through Mantle payment proof.
+Doge PayAgent is a hackathon prototype for a voice AI commerce agent that prepares real-world actions and pauses before payment. The user can run three approval-gated flows: book a Tokyo restaurant, order food, or prepare an Amazon-style shopping cart.
 
 The demo shows the realistic MVP flow:
 
 ```text
 User request
--> Doge extracts booking details
--> Supported Tokyo merchant is selected
--> Merchant/admin confirms the slot
--> Customer approves Mantle deposit
--> Backend verifies payment proof
--> Booking becomes confirmed and paid
+-> Doge extracts commerce intent
+-> Doge prepares the booking, order, or cart
+-> User reviews target, amount, and recipient
+-> Customer approves Mantle payment manually
+-> Backend verifies Mantle payment proof
+-> Request becomes confirmed and paid
 ```
 
 ## Current Scope
 
-- Supported Tokyo merchants only.
-- No random restaurant automation.
-- Merchant does not need to understand crypto.
+- Three demo workflows: Tokyo restaurant booking, food order, and shopping cart preparation.
+- No automatic spending by the AI agent.
+- No claim of direct Amazon, DoorDash, or random restaurant integration.
 - User manually approves the wallet transaction.
-- Mantle is used as the deposit/payment proof layer.
+- Mantle is used as the payment proof layer.
 - Slash/Card/Visa settlement is optional future work, not part of the MVP.
 
 ## Demo
@@ -31,16 +31,15 @@ The prototype is static and has no required dependencies. It simulates the produ
 
 ## What The Prototype Demonstrates
 
-- Natural-language booking request intake.
+- Natural-language commerce request intake.
 - Browser microphone voice request demo with text fallback.
-- AI-style extraction of cuisine, city, time window, guest count, and deposit.
-- Supported Tokyo merchant selection from a curated partner list.
-- Merchant/admin dashboard acceptance or rejection.
-- Mantle deposit payment request.
+- AI-style extraction for restaurant booking, food delivery, and shopping cart scenarios.
+- Real-world visual context for each workflow.
+- Prepared item/booking/order packets before payment.
+- Mantle payment request review.
 - User-approved wallet transaction simulation.
 - Backend payment verification simulation.
-- Confirmed paid booking receipt with booking ID, tx hash, timestamp, merchant, and deposit details.
-- Downloadable receipt and copyable demo summary.
+- Operations table with workflow, target, amount, approval state, proof, and status.
 - Spoken booking updates using the browser speech engine when available.
 
 ## Suggested GitHub Pages Setup
@@ -56,12 +55,12 @@ After uploading this folder to GitHub:
 ## Next Build Steps
 
 1. Replace demo extraction with the existing n8n/ElevenLabs workflow.
-2. Add Supabase tables for merchants, reservations, and payments.
+2. Add Supabase tables for requests, merchants, carts, orders, and payments.
 3. Add wallet connection with MetaMask or Reown AppKit.
 4. Verify Mantle transactions with `viem` or `ethers`.
-5. Add merchant authentication for the dashboard.
+5. Add merchant/service authentication for the dashboard.
 6. Replace simulated tx hashes with real Mantle transaction checks.
-7. Generate a signed receipt or on-chain receipt record.
+7. Generate signed receipts or on-chain receipt records.
 
 ## Repository Structure
 

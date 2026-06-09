@@ -1,148 +1,169 @@
-const merchants = [
-  {
-    id: "sakura-sushi-ginza",
-    name: "Sakura Sushi Ginza",
-    area: "Ginza",
-    cuisine: "Sushi",
-    slot: "7:30 PM",
-    deposit: "12.00",
-    token: "Supported stable token",
+const workflows = {
+  restaurant: {
+    type: "Restaurant Booking",
+    title: "Tokyo sushi reservation",
+    subtitle: "Doge finds a supported Tokyo restaurant, prepares the booking, then waits for approval before Mantle payment.",
+    request: "Hi Doge, book sushi in Tokyo tonight from 7-9 PM for 2 people.",
+    image: "https://images.unsplash.com/photo-1696449241254-11cf7f18ce32?auto=format&fit=crop&fm=jpg&ixlib=rb-4.1.0&q=80&w=1600",
+    credit: "Photo: Ryunosuke Kikuno / Unsplash",
+    target: "Sakura Sushi Ginza",
+    location: "Ginza, Tokyo",
+    amount: "12.00 USDC",
+    token: "USDC demo",
     recipient: "0x7a90...D0GE",
-    availability: "2 tables open",
+    intentTitle: "Book a table",
+    itemsTitle: "Reservation packet",
+    confidence: "96%",
+    approval: "Merchant slot + wallet",
+    readyStatus: "Slot ready",
+    confirmedStatus: "Slot confirmed",
+    proofStatus: "Reservation paid",
+    prompt: "Restaurant booking is selected.",
+    requestPrefix: "DOGE-TYO",
+    details: [
+      ["Cuisine", "Sushi"],
+      ["Time", "7:00 PM - 9:00 PM"],
+      ["Guests", "2"],
+      ["Constraint", "Supported Tokyo merchant"],
+      ["Confidence", "96%"],
+      ["Payment gate", "Manual Mantle approval"],
+    ],
+    items: [
+      { name: "Sakura Sushi Ginza", meta: "Ginza partner restaurant", price: "12.00 USDC" },
+      { name: "Table for 2", meta: "Tonight, 7:30 PM preferred slot", price: "Reserved" },
+      { name: "Deposit request", meta: "Held until user wallet approval", price: "Mantle" },
+    ],
   },
-  {
-    id: "shibuya-ramen-house",
-    name: "Shibuya Ramen House",
-    area: "Shibuya",
-    cuisine: "Ramen",
-    slot: "8:00 PM",
-    deposit: "8.00",
-    token: "Supported stable token",
+  food: {
+    type: "Food Order",
+    title: "Prepared dinner delivery",
+    subtitle: "Doge builds a takeout order from supported food partners, checks delivery details, and pauses before payment approval.",
+    request: "Hi Doge, order ramen and gyoza for delivery near Shibuya around 8 PM.",
+    image: "https://images.unsplash.com/photo-1752070182361-9fa562ed7f97?auto=format&fit=crop&fm=jpg&ixlib=rb-4.1.0&q=80&w=1600",
+    credit: "Photo: JESHOOTS.COM / Unsplash",
+    target: "Shibuya Ramen House",
+    location: "Shibuya delivery zone",
+    amount: "18.40 USDC",
+    token: "USDC demo",
     recipient: "0x4b18...TYO1",
-    availability: "fast confirmation",
+    intentTitle: "Order food",
+    itemsTitle: "Food basket",
+    confidence: "94%",
+    approval: "Order total + wallet",
+    readyStatus: "Order ready",
+    confirmedStatus: "Kitchen accepted",
+    proofStatus: "Delivery paid",
+    prompt: "Food order flow is selected.",
+    requestPrefix: "DOGE-FD",
+    details: [
+      ["Cuisine", "Ramen"],
+      ["Delivery ETA", "35-45 min"],
+      ["Items", "2 dishes"],
+      ["Constraint", "Supported food partner"],
+      ["Confidence", "94%"],
+      ["Payment gate", "Manual Mantle approval"],
+    ],
+    items: [
+      { name: "Tonkotsu ramen", meta: "No extra spice, regular size", price: "11.20 USDC" },
+      { name: "Gyoza set", meta: "6 pieces with dipping sauce", price: "5.20 USDC" },
+      { name: "Delivery and service", meta: "Shibuya area handoff", price: "2.00 USDC" },
+    ],
   },
-  {
-    id: "asakusa-izakaya-lab",
-    name: "Asakusa Izakaya Lab",
-    area: "Asakusa",
-    cuisine: "Izakaya",
-    slot: "7:45 PM",
-    deposit: "10.00",
-    token: "Supported stable token",
-    recipient: "0x91c2...TYO2",
-    availability: "group friendly",
+  shopping: {
+    type: "Shopping Cart",
+    title: "Amazon-style cart preparation",
+    subtitle: "Doge assembles a shopping cart from product preferences, summarizes cost and seller data, then waits for user approval.",
+    request: "Hi Doge, prepare a shopping cart with wireless headphones and a phone charger under 80 dollars.",
+    image: "https://images.unsplash.com/photo-1586880244406-556ebe35f282?auto=format&fit=crop&fm=jpg&ixlib=rb-4.1.0&q=80&w=1600",
+    credit: "Photo: Roberto Cortese / Unsplash",
+    target: "Electronics cart",
+    location: "Online marketplace",
+    amount: "76.80 USDC",
+    token: "USDC demo",
+    recipient: "0x91c2...CART",
+    intentTitle: "Prepare cart",
+    itemsTitle: "Shopping basket",
+    confidence: "91%",
+    approval: "Cart review + wallet",
+    readyStatus: "Cart ready",
+    confirmedStatus: "Cart locked",
+    proofStatus: "Checkout paid",
+    prompt: "Shopping cart flow is selected.",
+    requestPrefix: "DOGE-CART",
+    details: [
+      ["Category", "Electronics"],
+      ["Budget", "Under 80 USD"],
+      ["Items", "2 products"],
+      ["Constraint", "Amazon-style demo"],
+      ["Confidence", "91%"],
+      ["Payment gate", "Manual Mantle approval"],
+    ],
+    items: [
+      { name: "Wireless headphones", meta: "High-rated compact model", price: "49.90 USDC" },
+      { name: "USB-C fast charger", meta: "30W charger with cable", price: "19.90 USDC" },
+      { name: "Estimated tax/shipping", meta: "Demo checkout estimate", price: "7.00 USDC" },
+    ],
   },
-];
+};
 
 const state = {
-  bookingId: "",
+  activeFlow: "restaurant",
+  stage: "capture",
+  requestId: "",
   txHash: "",
-  timestamp: "",
-  selectedMerchantId: merchants[0].id,
   recognition: null,
   isListening: false,
-  extracted: {
-    cuisine: "Sushi",
-    city: "Tokyo",
-    time: "7:00 PM - 9:00 PM",
-    guests: "2",
+  rows: {
+    restaurant: { status: "Waiting", approval: "Not started", proof: "No proof" },
+    food: { status: "Waiting", approval: "Not started", proof: "No proof" },
+    shopping: { status: "Waiting", approval: "Not started", proof: "No proof" },
   },
 };
 
 const elements = {
-  overallStatus: document.getElementById("overallStatus"),
-  requestText: document.getElementById("requestText"),
-  quickPrompt: document.getElementById("quickPrompt"),
+  resetBtn: document.getElementById("resetBtn"),
   voiceBtn: document.getElementById("voiceBtn"),
   demoVoiceBtn: document.getElementById("demoVoiceBtn"),
-  voiceStatus: document.getElementById("voiceStatus"),
-  voiceStage: document.getElementById("voiceStage"),
+  runAgentBtn: document.getElementById("runAgentBtn"),
+  requestText: document.getElementById("requestText"),
   speakReplyToggle: document.getElementById("speakReplyToggle"),
-  analyzeBtn: document.getElementById("analyzeBtn"),
-  resetBtn: document.getElementById("resetBtn"),
-  createReservationBtn: document.getElementById("createReservationBtn"),
-  acceptSlotBtn: document.getElementById("acceptSlotBtn"),
-  rejectSlotBtn: document.getElementById("rejectSlotBtn"),
+  voiceHint: document.getElementById("voiceHint"),
+  tabs: Array.from(document.querySelectorAll(".workflow-tab")),
+  flowImage: document.getElementById("flowImage"),
+  flowHero: document.querySelector(".workflow-hero"),
+  flowType: document.getElementById("flowType"),
+  flowTitle: document.getElementById("flowTitle"),
+  flowSubtitle: document.getElementById("flowSubtitle"),
+  imageCredit: document.getElementById("imageCredit"),
+  summaryTarget: document.getElementById("summaryTarget"),
+  summaryLocation: document.getElementById("summaryLocation"),
+  summaryAmount: document.getElementById("summaryAmount"),
+  summaryStatus: document.getElementById("summaryStatus"),
+  intentTitle: document.getElementById("intentTitle"),
+  itemsTitle: document.getElementById("itemsTitle"),
+  intentGrid: document.getElementById("intentGrid"),
+  preparedList: document.getElementById("preparedList"),
+  confirmBtn: document.getElementById("confirmBtn"),
   approvePaymentBtn: document.getElementById("approvePaymentBtn"),
   verifyPaymentBtn: document.getElementById("verifyPaymentBtn"),
-  downloadReceiptBtn: document.getElementById("downloadReceiptBtn"),
-  copySummaryBtn: document.getElementById("copySummaryBtn"),
-  merchantList: document.getElementById("merchantList"),
-  merchantCount: document.getElementById("merchantCount"),
-  intentConfidence: document.getElementById("intentConfidence"),
-  detailCuisine: document.getElementById("detailCuisine"),
-  detailCity: document.getElementById("detailCity"),
-  detailTime: document.getElementById("detailTime"),
-  detailGuests: document.getElementById("detailGuests"),
-  detailDeposit: document.getElementById("detailDeposit"),
-  agentState: document.getElementById("agentState"),
-  agentSteps: Array.from(document.querySelectorAll(".agent-step")),
-  eventFeed: document.getElementById("eventFeed"),
-  reservationStatus: document.getElementById("reservationStatus"),
-  reservationSummary: document.getElementById("reservationSummary"),
-  merchantDecision: document.getElementById("merchantDecision"),
-  bookingId: document.getElementById("bookingId"),
-  paymentDeposit: document.getElementById("paymentDeposit"),
+  paymentStatus: document.getElementById("paymentStatus"),
+  requestId: document.getElementById("requestId"),
   paymentToken: document.getElementById("paymentToken"),
-  paymentNetwork: document.getElementById("paymentNetwork"),
   paymentRecipient: document.getElementById("paymentRecipient"),
+  paymentAmount: document.getElementById("paymentAmount"),
   txHash: document.getElementById("txHash"),
-  receiptState: document.getElementById("receiptState"),
-  receiptBody: document.getElementById("receiptBody"),
-  merchantFinalStatus: document.getElementById("merchantFinalStatus"),
-  paymentFinalStatus: document.getElementById("paymentFinalStatus"),
-  dogeReply: document.getElementById("dogeReply"),
-  trackerSteps: Array.from(document.querySelectorAll(".tracker-step")),
+  agentState: document.getElementById("agentState"),
+  timeline: Array.from(document.querySelectorAll(".timeline-step")),
+  opsTable: document.getElementById("opsTable"),
+  activityList: document.getElementById("activityList"),
 };
 
-function selectedMerchant() {
-  return merchants.find((merchant) => merchant.id === state.selectedMerchantId) || merchants[0];
+function activeWorkflow() {
+  return workflows[state.activeFlow];
 }
 
-function addEvent(title, body) {
-  const item = document.createElement("div");
-  item.className = "feed-item";
-  item.innerHTML = `<strong>${title}</strong><span>${body}</span>`;
-  elements.eventFeed.prepend(item);
-}
-
-function speak(message) {
-  if (!elements.speakReplyToggle.checked || !("speechSynthesis" in window)) return;
-  window.speechSynthesis.cancel();
-  const utterance = new SpeechSynthesisUtterance(message);
-  utterance.rate = 1;
-  utterance.pitch = 1;
-  window.speechSynthesis.speak(utterance);
-}
-
-function setVoiceState(status, listening = false) {
-  state.isListening = listening;
-  elements.voiceStatus.textContent = status;
-  elements.voiceStage.classList.toggle("listening", listening);
-  elements.voiceBtn.classList.toggle("listening", listening);
-}
-
-function setAgentStage(stage) {
-  const order = ["voice", "intent", "merchant", "approval", "payment"];
-  const currentIndex = order.indexOf(stage);
-  elements.agentSteps.forEach((step) => {
-    const stepIndex = order.indexOf(step.dataset.agentStep);
-    step.classList.toggle("complete", currentIndex > stepIndex);
-    step.classList.toggle("active", currentIndex === stepIndex);
-  });
-}
-
-function setTrackerStep(step) {
-  elements.trackerSteps.forEach((item) => {
-    const itemStep = Number(item.dataset.step);
-    item.classList.toggle("complete", itemStep < step);
-    item.classList.toggle("active", itemStep === step);
-  });
-}
-
-function makeBookingId() {
-  const suffix = Math.floor(1000 + Math.random() * 9000);
-  return `DOGE-TYO-${suffix}`;
+function makeRequestId(prefix) {
+  return `${prefix}-${Math.floor(1000 + Math.random() * 9000)}`;
 }
 
 function makeTxHash() {
@@ -154,132 +175,232 @@ function makeTxHash() {
   return hash;
 }
 
-function parseRequest(text) {
-  const lower = text.toLowerCase();
-  const cuisine = lower.includes("ramen")
-    ? "Ramen"
-    : lower.includes("izakaya")
-      ? "Izakaya"
-      : lower.includes("sushi")
-        ? "Sushi"
-        : "Any supported cuisine";
-
-  const guestsMatch = lower.match(/for\s+(\d+)\s*(people|guests|person)?/);
-  const guests = guestsMatch ? guestsMatch[1] : "2";
-
-  return {
-    cuisine,
-    city: "Tokyo",
-    time: "7:00 PM - 9:00 PM",
-    guests,
-  };
+function speak(message) {
+  if (!elements.speakReplyToggle.checked || !("speechSynthesis" in window)) return;
+  window.speechSynthesis.cancel();
+  const utterance = new SpeechSynthesisUtterance(message);
+  utterance.rate = 1;
+  utterance.pitch = 1;
+  window.speechSynthesis.speak(utterance);
 }
 
-function rankMerchant(extracted) {
-  const match = merchants.find((merchant) => merchant.cuisine === extracted.cuisine);
-  return match ? match.id : merchants[0].id;
+function addActivity(title, body) {
+  const item = document.createElement("div");
+  item.className = "activity-item";
+  item.innerHTML = `<strong>${title}</strong><span>${body}</span>`;
+  elements.activityList.prepend(item);
 }
 
-function updateDetails() {
-  const merchant = selectedMerchant();
-  elements.detailCuisine.textContent = state.extracted.cuisine;
-  elements.detailCity.textContent = state.extracted.city;
-  elements.detailTime.textContent = state.extracted.time;
-  elements.detailGuests.textContent = state.extracted.guests;
-  elements.detailDeposit.textContent = `${merchant.deposit} ${merchant.token}`;
-  elements.paymentDeposit.textContent = `${merchant.deposit} ${merchant.token}`;
-  elements.paymentToken.textContent = merchant.token;
-  elements.paymentNetwork.textContent = "Mantle";
-  elements.paymentRecipient.textContent = merchant.recipient;
+function rowClass(status) {
+  if (status.includes("paid") || status.includes("accepted") || status.includes("confirmed")) return "ready";
+  if (status.includes("Prepared") || status.includes("Wallet")) return "pending";
+  return "waiting";
 }
 
-function renderMerchants() {
-  elements.merchantCount.textContent = `${merchants.length} partners`;
-  elements.merchantList.innerHTML = "";
-
-  merchants.forEach((merchant) => {
-    const option = document.createElement("button");
-    option.type = "button";
-    option.className = "merchant-option";
-    option.classList.toggle("selected", merchant.id === state.selectedMerchantId);
-    option.innerHTML = `
-      <strong>${merchant.name}</strong>
-      <span>${merchant.area} | ${merchant.cuisine} | ${merchant.slot}</span>
-      <em>${merchant.availability} | ${merchant.deposit} token deposit</em>
+function renderOpsTable() {
+  elements.opsTable.innerHTML = "";
+  Object.entries(workflows).forEach(([id, flow]) => {
+    const row = state.rows[id];
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${id === state.activeFlow && state.requestId ? state.requestId : "--"}</td>
+      <td>${flow.type}</td>
+      <td>${flow.target}</td>
+      <td>${flow.amount}</td>
+      <td>${row.approval}</td>
+      <td><code>${row.proof}</code></td>
+      <td><span class="row-status ${rowClass(row.status)}">${row.status}</span></td>
     `;
-    option.addEventListener("click", () => {
-      state.selectedMerchantId = merchant.id;
-      updateDetails();
-      renderMerchants();
-      if (!state.bookingId) elements.createReservationBtn.disabled = false;
-      addEvent("Merchant selected", `${merchant.name} is active for this booking.`);
-    });
-    elements.merchantList.appendChild(option);
+    elements.opsTable.appendChild(tr);
   });
 }
 
-function receiptText() {
-  const merchant = selectedMerchant();
-  return [
-    "Doge PayAgent Booking Receipt",
-    "",
-    `Booking ID: ${state.bookingId}`,
-    `Merchant: ${merchant.name}`,
-    `Area: ${merchant.area}, Tokyo`,
-    `Cuisine: ${merchant.cuisine}`,
-    `Guests: ${state.extracted.guests}`,
-    `Time: ${merchant.slot}`,
-    `Deposit: ${merchant.deposit} ${merchant.token}`,
-    "Network: Mantle",
-    `Recipient: ${merchant.recipient}`,
-    `Transaction: ${state.txHash}`,
-    `Timestamp: ${state.timestamp}`,
-    "Status: Confirmed + Paid",
-  ].join("\n");
+function renderIntent(flow) {
+  elements.intentGrid.innerHTML = "";
+  flow.details.forEach(([label, value]) => {
+    const item = document.createElement("div");
+    item.innerHTML = `<span>${label}</span><strong>${value}</strong>`;
+    elements.intentGrid.appendChild(item);
+  });
 }
 
-function runAnalysis() {
-  state.bookingId = "";
+function renderItems(flow) {
+  elements.preparedList.innerHTML = "";
+  flow.items.forEach((item) => {
+    const row = document.createElement("div");
+    row.className = "prepared-item";
+    row.innerHTML = `
+      <div>
+        <strong>${item.name}</strong>
+        <em>${item.meta}</em>
+      </div>
+      <div class="prepared-price">${item.price}</div>
+    `;
+    elements.preparedList.appendChild(row);
+  });
+}
+
+function setStage(stage) {
+  state.stage = stage;
+  const order = ["capture", "prepare", "confirm", "approve", "proof"];
+  const index = order.indexOf(stage);
+
+  elements.timeline.forEach((step) => {
+    const stepIndex = order.indexOf(step.dataset.step);
+    step.classList.toggle("complete", index > stepIndex);
+    step.classList.toggle("active", index === stepIndex);
+  });
+
+  const labels = {
+    capture: "Idle",
+    prepare: "Preparing",
+    confirm: "Confirming",
+    approve: "Approval",
+    proof: "Verified",
+  };
+  elements.agentState.textContent = labels[stage];
+  elements.agentState.className = `state-pill ${stage === "proof" ? "verified" : stage === "capture" ? "" : "pending"}`;
+}
+
+function setPaymentState(label, className = "") {
+  elements.paymentStatus.textContent = label;
+  elements.paymentStatus.className = `state-pill ${className}`;
+}
+
+function updateButtons() {
+  elements.confirmBtn.disabled = state.stage !== "prepare";
+  elements.approvePaymentBtn.disabled = state.stage !== "confirm";
+  elements.verifyPaymentBtn.disabled = state.stage !== "approve";
+}
+
+function updateFlowView(useTransition = false) {
+  const flow = activeWorkflow();
+
+  elements.tabs.forEach((tab) => {
+    tab.classList.toggle("active", tab.dataset.flow === state.activeFlow);
+  });
+
+  if (useTransition) {
+    elements.flowHero.classList.add("is-switching");
+    window.setTimeout(() => elements.flowHero.classList.remove("is-switching"), 220);
+  }
+
+  elements.flowImage.src = flow.image;
+  elements.flowImage.alt = `${flow.type} visual`;
+  elements.flowType.textContent = flow.type;
+  elements.flowTitle.textContent = flow.title;
+  elements.flowSubtitle.textContent = flow.subtitle;
+  elements.imageCredit.textContent = flow.credit;
+  elements.voiceHint.textContent = flow.prompt;
+  elements.requestText.value = flow.request;
+  elements.summaryTarget.textContent = flow.target;
+  elements.summaryLocation.textContent = flow.location;
+  elements.summaryAmount.textContent = flow.amount;
+  elements.summaryStatus.textContent = state.rows[state.activeFlow].status;
+  elements.intentTitle.textContent = flow.intentTitle;
+  elements.itemsTitle.textContent = flow.itemsTitle;
+  elements.paymentToken.textContent = flow.token;
+  elements.paymentRecipient.textContent = flow.recipient;
+  elements.paymentAmount.textContent = flow.amount;
+
+  renderIntent(flow);
+  renderItems(flow);
+  renderOpsTable();
+  updateButtons();
+}
+
+function resetActiveFlow() {
+  const flow = activeWorkflow();
+  state.stage = "capture";
+  state.requestId = "";
   state.txHash = "";
-  state.timestamp = "";
-  state.extracted = parseRequest(elements.requestText.value);
-  state.selectedMerchantId = rankMerchant(state.extracted);
-
-  elements.overallStatus.textContent = "Analyzed";
-  elements.agentState.textContent = "Matching";
-  elements.intentConfidence.textContent = "96%";
-  elements.createReservationBtn.disabled = false;
-  elements.acceptSlotBtn.disabled = true;
-  elements.rejectSlotBtn.disabled = true;
-  elements.approvePaymentBtn.disabled = true;
-  elements.verifyPaymentBtn.disabled = true;
-  elements.downloadReceiptBtn.disabled = true;
-  elements.copySummaryBtn.disabled = true;
-  elements.reservationStatus.textContent = "Merchant match ready";
-  elements.reservationSummary.textContent = `Doge selected ${selectedMerchant().name} from supported Tokyo merchants.`;
-  elements.merchantDecision.textContent = "Ready to create a pending reservation for merchant review.";
-  elements.bookingId.textContent = "Not created";
+  state.rows[state.activeFlow] = {
+    status: "Waiting",
+    approval: "Not started",
+    proof: "No proof",
+  };
+  elements.requestId.textContent = "Not created";
   elements.txHash.textContent = "No transaction yet";
-  elements.merchantFinalStatus.textContent = "Pending";
-  elements.paymentFinalStatus.textContent = "Pending";
-  elements.dogeReply.textContent = "Waiting";
-  elements.receiptState.textContent = "Pending";
-  elements.receiptBody.textContent = "Complete the flow to generate a confirmed paid booking receipt.";
+  elements.summaryStatus.textContent = "Waiting";
+  setPaymentState("Waiting");
+  setStage("capture");
+  updateButtons();
+  renderOpsTable();
+  addActivity("Flow reset", `${flow.type} is ready for a new request.`);
+}
 
-  updateDetails();
-  renderMerchants();
-  setAgentStage("merchant");
-  setTrackerStep(1);
-  addEvent("Intent extracted", `${state.extracted.cuisine}, ${state.extracted.guests} guests, ${state.extracted.time}.`);
-  addEvent("Merchant matched", `${selectedMerchant().name} is available at ${selectedMerchant().slot}.`);
-  speak(`I found ${selectedMerchant().name}. I can create a pending reservation for ${selectedMerchant().slot}.`);
+function runAgent() {
+  const flow = activeWorkflow();
+  state.requestId = makeRequestId(flow.requestPrefix);
+  state.rows[state.activeFlow] = {
+    status: "Prepared",
+    approval: flow.approval,
+    proof: "Awaiting user",
+  };
+  elements.requestId.textContent = state.requestId;
+  elements.summaryStatus.textContent = flow.readyStatus;
+  setPaymentState("Review required", "pending");
+  setStage("prepare");
+  updateButtons();
+  renderOpsTable();
+  addActivity("Agent prepared request", `${flow.target} is ready for user review. Amount: ${flow.amount}.`);
+  speak(`I prepared ${flow.type.toLowerCase()} for ${flow.target}. Please review before payment.`);
+}
+
+function confirmPreparedRequest() {
+  const flow = activeWorkflow();
+  state.rows[state.activeFlow].status = flow.confirmedStatus;
+  state.rows[state.activeFlow].approval = "Ready for wallet";
+  elements.summaryStatus.textContent = flow.confirmedStatus;
+  setPaymentState("Wallet approval", "pending");
+  setStage("confirm");
+  updateButtons();
+  renderOpsTable();
+  addActivity("Request confirmed", `${flow.target} is locked. Payment still requires user wallet approval.`);
+  speak(`${flow.target} is confirmed. Payment is waiting for your Mantle approval.`);
+}
+
+function approvePayment() {
+  const flow = activeWorkflow();
+  state.txHash = makeTxHash();
+  state.rows[state.activeFlow].status = "Wallet approved";
+  state.rows[state.activeFlow].approval = "Approved";
+  state.rows[state.activeFlow].proof = "Pending verify";
+  elements.txHash.textContent = state.txHash;
+  elements.summaryStatus.textContent = "Wallet approved";
+  setPaymentState("Tx submitted", "pending");
+  setStage("approve");
+  updateButtons();
+  renderOpsTable();
+  addActivity("Mantle transaction submitted", `${flow.amount} approval created for ${flow.recipient}.`);
+  speak("Mantle transaction submitted. Verifying the proof now keeps the request auditable.");
+}
+
+function verifyPayment() {
+  const flow = activeWorkflow();
+  const shortHash = `${state.txHash.slice(0, 8)}...${state.txHash.slice(-6)}`;
+  state.rows[state.activeFlow].status = flow.proofStatus;
+  state.rows[state.activeFlow].approval = "Approved";
+  state.rows[state.activeFlow].proof = shortHash;
+  elements.summaryStatus.textContent = flow.proofStatus;
+  setPaymentState("Verified", "verified");
+  setStage("proof");
+  updateButtons();
+  renderOpsTable();
+  addActivity("Mantle proof verified", `${flow.type} completed with proof ${shortHash}.`);
+  speak(`${flow.type} is complete. Mantle payment proof is verified.`);
+}
+
+function setVoiceState(label, listening = false) {
+  state.isListening = listening;
+  elements.voiceHint.textContent = label;
+  elements.voiceBtn.classList.toggle("listening", listening);
 }
 
 function initSpeechRecognition() {
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
   if (!SpeechRecognition) {
-    elements.voiceStatus.textContent = "Voice fallback";
-    addEvent("Voice fallback ready", "Use Demo Voice or type the request manually.");
+    setVoiceState(activeWorkflow().prompt);
     return;
   }
 
@@ -289,9 +410,9 @@ function initSpeechRecognition() {
   state.recognition.continuous = false;
 
   state.recognition.onstart = () => {
-    setVoiceState("Listening", true);
-    setAgentStage("voice");
-    addEvent("Voice session started", "Listening for a booking request.");
+    setVoiceState("Listening for your request...", true);
+    setStage("capture");
+    addActivity("Voice session started", "Browser microphone is listening.");
   };
 
   state.recognition.onresult = (event) => {
@@ -299,201 +420,72 @@ function initSpeechRecognition() {
       .map((result) => result[0].transcript)
       .join(" ");
     elements.requestText.value = transcript;
-    elements.quickPrompt.value = transcript;
+
     if (event.results[event.results.length - 1].isFinal) {
-      addEvent("Voice captured", transcript);
-      setVoiceState("Captured", false);
-      runAnalysis();
+      setVoiceState("Voice captured", false);
+      addActivity("Voice captured", transcript);
+      runAgent();
     }
   };
 
   state.recognition.onerror = () => {
-    setVoiceState("Mic issue", false);
-    addEvent("Microphone issue", "Use Demo Voice or type manually.");
+    setVoiceState("Microphone unavailable. Demo voice still works.", false);
+    addActivity("Microphone issue", "Use Demo Voice or edit the transcript.");
   };
 
   state.recognition.onend = () => {
-    if (state.isListening) setVoiceState("Captured", false);
+    if (state.isListening) setVoiceState(activeWorkflow().prompt, false);
   };
 }
 
-function resetDemo() {
-  state.bookingId = "";
-  state.txHash = "";
-  state.timestamp = "";
-  state.selectedMerchantId = merchants[0].id;
-  state.extracted = {
-    cuisine: "Sushi",
-    city: "Tokyo",
-    time: "7:00 PM - 9:00 PM",
-    guests: "2",
-  };
-
-  elements.requestText.value = "Hi Doge, book sushi in Tokyo tonight from 7-9 PM for 2 people.";
-  elements.quickPrompt.value = "Book sushi in Tokyo tonight 7-9 PM";
-  elements.eventFeed.innerHTML = "";
-  elements.overallStatus.textContent = "Ready";
-  elements.agentState.textContent = "Idle";
-  elements.intentConfidence.textContent = "92%";
-  elements.createReservationBtn.disabled = true;
-  elements.acceptSlotBtn.disabled = true;
-  elements.rejectSlotBtn.disabled = true;
-  elements.approvePaymentBtn.disabled = true;
-  elements.verifyPaymentBtn.disabled = true;
-  elements.downloadReceiptBtn.disabled = true;
-  elements.copySummaryBtn.disabled = true;
-  elements.reservationStatus.textContent = "Waiting for request";
-  elements.reservationSummary.textContent = "Start with voice or text to create a supported merchant request.";
-  elements.merchantDecision.textContent = "Merchant sees a normal booking request. No crypto knowledge is required.";
-  elements.bookingId.textContent = "Not created";
-  elements.txHash.textContent = "No transaction yet";
-  elements.receiptState.textContent = "Pending";
-  elements.receiptBody.textContent = "Complete the flow to generate a confirmed paid booking receipt.";
-  elements.merchantFinalStatus.textContent = "Pending";
-  elements.paymentFinalStatus.textContent = "Pending";
-  elements.dogeReply.textContent = "Waiting";
-
-  updateDetails();
-  renderMerchants();
-  setVoiceState(state.recognition ? "Mic ready" : "Voice fallback", false);
-  setAgentStage("voice");
-  setTrackerStep(1);
-  addEvent("System ready", "Voice, merchant approval, and Mantle proof modules are online.");
-}
-
-elements.quickPrompt.addEventListener("change", () => {
-  elements.requestText.value = elements.quickPrompt.value;
+elements.tabs.forEach((tab) => {
+  tab.addEventListener("click", () => {
+    state.activeFlow = tab.dataset.flow;
+    state.stage = "capture";
+    state.requestId = "";
+    state.txHash = "";
+    elements.requestId.textContent = "Not created";
+    elements.txHash.textContent = "No transaction yet";
+    setPaymentState("Waiting");
+    setStage("capture");
+    updateFlowView(true);
+    addActivity("Workflow changed", `${activeWorkflow().type} selected.`);
+  });
 });
 
 elements.voiceBtn.addEventListener("click", () => {
   if (!state.recognition) {
-    elements.requestText.value = "Hi Doge, book sushi in Tokyo tonight from 7-9 PM for 2 people.";
-    runAnalysis();
+    setVoiceState("Demo voice captured", false);
+    runAgent();
     return;
   }
+
   if (state.isListening) {
     state.recognition.stop();
-    setVoiceState("Stopped", false);
+    setVoiceState(activeWorkflow().prompt, false);
     return;
   }
+
   state.recognition.start();
 });
 
 elements.demoVoiceBtn.addEventListener("click", () => {
-  const demoRequest = "Hi Doge, book sushi in Tokyo tonight from 7 to 9 PM for 2 people.";
-  elements.requestText.value = demoRequest;
-  elements.quickPrompt.value = demoRequest;
-  setVoiceState("Demo captured", false);
-  setAgentStage("intent");
-  addEvent("Demo voice captured", demoRequest);
-  runAnalysis();
+  const flow = activeWorkflow();
+  elements.requestText.value = flow.request;
+  setVoiceState("Demo voice captured", false);
+  addActivity("Demo voice captured", flow.request);
+  runAgent();
 });
 
-elements.analyzeBtn.addEventListener("click", runAnalysis);
-
-elements.createReservationBtn.addEventListener("click", () => {
-  const merchant = selectedMerchant();
-  state.bookingId = makeBookingId();
-  elements.bookingId.textContent = state.bookingId;
-  elements.overallStatus.textContent = "Pending merchant";
-  elements.agentState.textContent = "Merchant review";
-  elements.reservationStatus.textContent = "Pending merchant confirmation";
-  elements.reservationSummary.textContent = `${state.bookingId}: ${merchant.name}, ${state.extracted.guests} guests, ${merchant.slot}, ${merchant.deposit} token deposit.`;
-  elements.merchantDecision.textContent = "Merchant/admin can accept this slot or reject it and trigger another search.";
-  elements.acceptSlotBtn.disabled = false;
-  elements.rejectSlotBtn.disabled = false;
-  elements.createReservationBtn.disabled = true;
-  setAgentStage("approval");
-  setTrackerStep(2);
-  addEvent("Reservation request created", `${state.bookingId} sent to ${merchant.name}.`);
-  speak(`I created a pending request for ${merchant.name}. Waiting for merchant confirmation.`);
-});
-
-elements.rejectSlotBtn.addEventListener("click", () => {
-  elements.overallStatus.textContent = "Alternative needed";
-  elements.agentState.textContent = "Rematching";
-  elements.reservationStatus.textContent = "Slot rejected";
-  elements.reservationSummary.textContent = "Doge suggests another time or restaurant and loops back to supported merchant search.";
-  elements.merchantDecision.textContent = "Rejected by merchant. Choose another supported Tokyo merchant or time slot.";
-  elements.createReservationBtn.disabled = false;
-  elements.acceptSlotBtn.disabled = true;
-  elements.rejectSlotBtn.disabled = true;
-  elements.approvePaymentBtn.disabled = true;
-  setAgentStage("merchant");
-  setTrackerStep(1);
-  addEvent("Slot rejected", "Doge is ready to suggest another merchant or time.");
-  speak("The merchant rejected that slot. I can suggest another supported Tokyo option.");
-});
-
-elements.acceptSlotBtn.addEventListener("click", () => {
-  elements.overallStatus.textContent = "Slot accepted";
-  elements.agentState.textContent = "Payment ready";
-  elements.reservationStatus.textContent = "Slot accepted";
-  elements.reservationSummary.textContent = "Merchant accepted the slot. Doge can now request a Mantle deposit.";
-  elements.merchantDecision.textContent = "Accepted by merchant. Payment request is ready for user approval.";
-  elements.approvePaymentBtn.disabled = false;
-  elements.acceptSlotBtn.disabled = true;
-  elements.rejectSlotBtn.disabled = true;
-  setAgentStage("payment");
-  setTrackerStep(3);
-  addEvent("Merchant accepted", "Mantle deposit request is ready for manual user approval.");
-  speak("The merchant accepted the slot. Please approve the Mantle deposit to confirm the booking.");
-});
-
-elements.approvePaymentBtn.addEventListener("click", () => {
-  state.txHash = makeTxHash();
-  elements.txHash.textContent = state.txHash;
-  elements.overallStatus.textContent = "Wallet approved";
-  elements.paymentFinalStatus.textContent = "Approval submitted";
-  elements.verifyPaymentBtn.disabled = false;
-  elements.approvePaymentBtn.disabled = true;
-  addEvent("Wallet transaction approved", state.txHash);
-  speak("Wallet approval submitted. I am ready to verify the Mantle transaction proof.");
-});
-
-elements.verifyPaymentBtn.addEventListener("click", () => {
-  const merchant = selectedMerchant();
-  state.timestamp = new Date().toISOString();
-  elements.overallStatus.textContent = "Confirmed";
-  elements.agentState.textContent = "Complete";
-  elements.reservationStatus.textContent = "Confirmed and paid";
-  elements.reservationSummary.textContent = "The backend verified the Mantle transaction and updated the booking.";
-  elements.verifyPaymentBtn.disabled = true;
-  elements.downloadReceiptBtn.disabled = false;
-  elements.copySummaryBtn.disabled = false;
-  elements.receiptState.textContent = "Confirmed";
-  elements.merchantFinalStatus.textContent = "Paid reservation visible";
-  elements.paymentFinalStatus.textContent = state.txHash;
-  elements.dogeReply.textContent = "Your booking is confirmed";
-  elements.receiptBody.textContent = `${state.bookingId} is confirmed for ${merchant.name} at ${merchant.slot}. Mantle payment proof is attached.`;
-  setTrackerStep(4);
-  addEvent("Payment verified", `${merchant.deposit} ${merchant.token} verified on Mantle.`);
-  addEvent("Booking confirmed", `${state.bookingId} is confirmed and paid.`);
-  speak(`Your booking is confirmed. ${merchant.name}, ${merchant.slot}. Mantle payment proof is attached.`);
-});
-
-elements.downloadReceiptBtn.addEventListener("click", () => {
-  const blob = new Blob([receiptText()], { type: "text/plain" });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = `${state.bookingId || "doge-payagent"}-receipt.txt`;
-  document.body.appendChild(link);
-  link.click();
-  link.remove();
-  URL.revokeObjectURL(url);
-});
-
-elements.copySummaryBtn.addEventListener("click", async () => {
-  try {
-    await navigator.clipboard.writeText(receiptText());
-    elements.overallStatus.textContent = "Summary copied";
-  } catch {
-    elements.overallStatus.textContent = "Copy unavailable";
-  }
-});
-
-elements.resetBtn.addEventListener("click", resetDemo);
+elements.runAgentBtn.addEventListener("click", runAgent);
+elements.confirmBtn.addEventListener("click", confirmPreparedRequest);
+elements.approvePaymentBtn.addEventListener("click", approvePayment);
+elements.verifyPaymentBtn.addEventListener("click", verifyPayment);
+elements.resetBtn.addEventListener("click", resetActiveFlow);
 
 initSpeechRecognition();
-resetDemo();
+updateFlowView();
+setStage("capture");
+setPaymentState("Waiting");
+renderOpsTable();
+addActivity("System ready", "Doge PayAgent is online with three approval-gated commerce flows.");
