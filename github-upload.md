@@ -30,17 +30,17 @@ docs/github-upload.md
 ## Suggested Repository Description
 
 ```text
-AI booking and Mantle payment-proof prototype for supported Tokyo merchants.
+Voice AI commerce agent with user-approved Mantle payment proof.
 ```
 
 ## Suggested Submission Summary
 
 ```text
-Doge PayAgent turns a natural-language booking request into a supported Tokyo merchant reservation, merchant confirmation, user-approved Mantle deposit, backend payment verification, and confirmed paid booking receipt.
+Doge PayAgent turns natural-language requests into prepared restaurant bookings, food orders, and shopping carts. The AI prepares the action, the user approves the Mantle payment, and the backend verifies transaction proof before confirmation.
 ```
 
 ## Important Demo Disclaimer
 
 ```text
-This prototype demonstrates the product flow. Random restaurant automation, Visa/card payments, and merchant payout settlement are outside the MVP scope.
+This prototype demonstrates the product flow. Doge does not automatically spend user funds, and direct Amazon/DoorDash/random merchant integrations are outside the MVP scope.
 ```

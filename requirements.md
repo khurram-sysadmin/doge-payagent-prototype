@@ -3,17 +3,19 @@
 ## Required For Demo
 
 - Static web demo in this repository.
-- Supported Tokyo merchant data with multiple selectable merchants.
-- Simulated Doge intent extraction.
-- Simulated merchant dashboard acceptance.
+- Three workflow tabs: restaurant booking, food order, and shopping cart.
+- Browser microphone demo with text fallback.
+- Simulated Doge intent extraction and request preparation.
+- Real-world visual context for each workflow.
+- User approval gate before payment.
 - Simulated Mantle wallet transaction hash.
-- Booking receipt with payment proof.
-- Downloadable receipt and copyable demo summary.
+- Simulated backend verification of payment proof.
+- Operations table with workflow, target, amount, approval, proof, and status.
 
 ## Required For Live MVP
 
 - ElevenLabs or browser voice input.
-- n8n workflow for intent detection.
+- n8n workflow for intent detection and routing.
 - LLM provider such as OpenRouter, OpenAI, or Anthropic.
 - Supabase database.
 - Mantle RPC provider.
@@ -24,37 +26,38 @@
 ## Optional Later
 
 - Slash or other merchant payout rail.
-- Real merchant accounts.
-- Merchant authentication.
+- Real merchant or service accounts.
+- Merchant/service authentication.
 - Real-time notifications by email, SMS, or Slack.
 - On-chain receipt contract.
-- Slash or fiat payout integration after the MVP proves demand.
+- Fiat payout integration after the MVP proves demand.
 
 ## Suggested Tables
 
 ```text
-merchants
+requests
 - id
-- name
-- city
-- cuisine
-- deposit_amount
-- supported_token
+- workflow_type
+- customer_prompt
+- target_name
+- location
+- amount
 - status
-
-reservations
-- id
-- merchant_id
-- customer_name
-- party_size
-- requested_time
-- status
-- payment_status
+- approval_status
 - tx_hash
+
+prepared_items
+- id
+- request_id
+- item_name
+- item_type
+- quantity
+- unit_price
+- notes
 
 payments
 - id
-- reservation_id
+- request_id
 - chain
 - token
 - amount
