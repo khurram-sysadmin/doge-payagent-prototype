@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Doge PayAgent Prototype</title>
+    <title>Doge PayAgent | Restaurant Reservation MVP</title>
     <link rel="stylesheet" href="styles.css">
   </head>
   <body>
@@ -13,250 +13,243 @@
           <div class="brand-mark">D</div>
           <div>
             <strong>Doge PayAgent</strong>
-            <span>Commerce control room</span>
+            <span>Restaurant agent MVP</span>
           </div>
         </div>
 
         <nav class="side-nav">
-          <a href="#overview" class="active">Overview</a>
-          <a href="#voice-agent">Voice Agent</a>
-          <a href="#workflows">Workflows</a>
-          <a href="#mantle-proof">Mantle Proof</a>
-          <a href="#activity">Activity</a>
+          <a class="active" href="#demo">Live Demo</a>
+          <a href="#restaurant">Restaurant Dashboard</a>
+          <a href="#proof">Mantle Proof</a>
+          <a href="#timeline">Timeline</a>
         </nav>
 
-        <div class="sidebar-status">
-          <span class="status-dot"></span>
-          <strong>Hackathon MVP</strong>
-          <p>AI prepares real-world actions. Users approve all Mantle payments.</p>
+        <div class="sidebar-card">
+          <span class="live-dot"></span>
+          <strong>Focused hackathon scope</strong>
+          <p>One workflow: customer voice/chat reservation, Mantle deposit verification, restaurant dashboard update.</p>
         </div>
       </aside>
 
-      <main class="main" id="overview">
-        <header class="topbar">
-          <div>
-            <p class="eyebrow">Mantle Turing Test Hackathon</p>
-            <h1>Three-flow AI commerce dashboard</h1>
+      <main class="main">
+        <header class="hero">
+          <div class="hero-copy">
+            <p class="eyebrow">B2B AI agent for restaurants</p>
+            <h1>Reservation agent that turns a customer request into a confirmed booking.</h1>
+            <p>
+              Doge handles the conversation, checks restaurant availability, creates the reservation, requests a Mantle deposit, verifies proof, and updates the restaurant dashboard.
+            </p>
           </div>
 
-          <div class="topbar-actions">
-            <div class="network-pill">
-              <span></span>
-              Mantle connected
+          <div class="hero-visual" aria-label="Restaurant reservation visual">
+            <div class="fallback-scene" aria-hidden="true">
+              <span></span><span></span><span></span>
             </div>
-            <button id="resetBtn" class="ghost-btn" type="button">Reset demo</button>
+            <div class="hero-overlay">
+              <span id="heroStatus">Ready for customer request</span>
+              <strong>Sakura Sushi Tokyo</strong>
+            </div>
           </div>
         </header>
 
-        <section class="metric-grid" aria-label="Product metrics">
-          <article class="metric-card">
-            <span>Agent requests</span>
-            <strong id="metricRequests">1,284</strong>
-            <small>voice and text intents</small>
+        <section class="metrics" aria-label="Demo metrics">
+          <article>
+            <span>Today's Reservations</span>
+            <strong id="metricReservations">18</strong>
+            <small>+1 after confirmation</small>
           </article>
-          <article class="metric-card">
-            <span>Approval required</span>
-            <strong id="metricApprovals">100%</strong>
-            <small>no automatic spending</small>
+          <article>
+            <span>Open Slots</span>
+            <strong id="metricSlots">7</strong>
+            <small>7-9 PM still available</small>
           </article>
-          <article class="metric-card">
-            <span>Proof latency</span>
-            <strong id="metricLatency">286ms</strong>
-            <small>Mantle verification demo</small>
+          <article>
+            <span>Deposit Status</span>
+            <strong id="metricPayment">Waiting</strong>
+            <small>Mantle proof required</small>
           </article>
-          <article class="metric-card">
-            <span>Supported flows</span>
-            <strong>3</strong>
-            <small>restaurant, food, shopping</small>
+          <article>
+            <span>Agent Confidence</span>
+            <strong id="metricConfidence">--</strong>
+            <small>intent extraction</small>
           </article>
         </section>
 
-        <section class="command-grid" id="voice-agent">
-          <article class="voice-console">
-            <div class="voice-copy">
-              <p class="eyebrow">Voice intake</p>
-              <h2>Ask Doge to prepare the request</h2>
-              <p id="voiceHint">Restaurant booking is selected.</p>
+        <section class="demo-grid" id="demo">
+          <article class="panel customer-panel">
+            <div class="panel-header">
+              <div>
+                <p class="eyebrow">Customer agent</p>
+                <h2>Voice and chat reservation</h2>
+              </div>
+              <span id="agentBadge" class="state-pill">Idle</span>
             </div>
 
-            <div class="mic-wrap">
-              <button id="voiceBtn" class="mic-button" type="button" aria-label="Start voice request">
-                <span class="mic-icon"></span>
+            <div class="mic-stage">
+              <button id="voiceBtn" class="mic-button" type="button" aria-label="Start microphone">
+                <span></span>
               </button>
-              <div class="signal-bars" aria-hidden="true">
-                <span></span><span></span><span></span><span></span><span></span>
+              <div class="voice-waves" aria-hidden="true">
+                <i></i><i></i><i></i><i></i><i></i>
+              </div>
+              <p id="voiceStatus">Click the mic or use the demo request.</p>
+            </div>
+
+            <label class="input-label" for="requestText">Customer request</label>
+            <textarea id="requestText" rows="4">Hi Doge, book a table for 4 people tonight at 8 PM.</textarea>
+
+            <div class="button-row">
+              <button id="runAgentBtn" class="primary-btn" type="button">Run Reservation Agent</button>
+              <button id="demoVoiceBtn" class="secondary-btn" type="button">Demo Voice</button>
+              <button id="resetBtn" class="ghost-btn" type="button">Reset</button>
+            </div>
+
+            <label class="toggle-row">
+              <input id="speakReplyToggle" type="checkbox" checked>
+              <span>Doge voice reply</span>
+            </label>
+
+            <div class="chat-window" id="chatWindow" aria-live="polite"></div>
+          </article>
+
+          <article class="panel extraction-panel">
+            <div class="panel-header">
+              <div>
+                <p class="eyebrow">AI extraction</p>
+                <h2>Reservation packet</h2>
+              </div>
+              <span id="packetStatus" class="state-pill">Not created</span>
+            </div>
+
+            <div class="reservation-card">
+              <div>
+                <span>Guest Name</span>
+                <strong id="guestName">Muhammad</strong>
+              </div>
+              <div>
+                <span>Party Size</span>
+                <strong id="partySize">--</strong>
+              </div>
+              <div>
+                <span>Date</span>
+                <strong id="bookingDate">Tonight</strong>
+              </div>
+              <div>
+                <span>Time</span>
+                <strong id="bookingTime">--</strong>
+              </div>
+              <div>
+                <span>Table</span>
+                <strong id="tableSlot">--</strong>
+              </div>
+              <div>
+                <span>Deposit</span>
+                <strong id="depositAmount">12 USDC</strong>
               </div>
             </div>
 
-            <div class="transcript-box">
-              <label for="requestText">Transcript</label>
-              <textarea id="requestText" rows="4">Hi Doge, book sushi in Tokyo tonight from 7-9 PM for 2 people.</textarea>
-              <div class="button-row">
-                <button id="runAgentBtn" class="primary-btn" type="button">Run Agent</button>
-                <button id="demoVoiceBtn" class="secondary-btn" type="button">Demo Voice</button>
-                <label class="speak-toggle">
-                  <input id="speakReplyToggle" type="checkbox" checked>
-                  Voice reply
-                </label>
+            <div class="availability-board">
+              <div class="board-title">
+                <span>Tonight availability</span>
+                <strong id="slotDecision">Waiting for request</strong>
               </div>
+              <div class="slot-grid" id="slotGrid"></div>
+            </div>
+
+            <div class="agent-note" id="agentNote">
+              Doge will only confirm the reservation after the customer approves the Mantle deposit.
             </div>
           </article>
 
-          <article class="safety-panel">
-            <div>
-              <p class="eyebrow">Safety model</p>
-              <h2>User approval gate</h2>
-            </div>
-            <ul class="safety-list">
-              <li><span></span>Doge prepares booking, order, or cart</li>
-              <li><span></span>User reviews merchant, amount, and recipient</li>
-              <li><span></span>Mantle transaction proof confirms payment intent</li>
-            </ul>
-          </article>
-        </section>
-
-        <section class="workspace-grid" id="workflows">
-          <article class="workflow-panel">
-            <div class="workflow-tabs" role="tablist" aria-label="Commerce workflows">
-              <button class="workflow-tab active" type="button" data-flow="restaurant">Restaurant Booking</button>
-              <button class="workflow-tab" type="button" data-flow="food">Food Order</button>
-              <button class="workflow-tab" type="button" data-flow="shopping">Shopping Cart</button>
-            </div>
-
-            <div class="workflow-hero">
-              <img id="flowImage" src="" alt="">
-              <div class="image-shade"></div>
-              <div class="hero-content">
-                <span id="flowType">Restaurant Booking</span>
-                <h2 id="flowTitle">Tokyo sushi reservation</h2>
-                <p id="flowSubtitle">Doge finds a supported Tokyo restaurant, prepares the booking, then waits for approval before Mantle payment.</p>
-              </div>
-              <div class="image-credit" id="imageCredit">Photo: Unsplash</div>
-            </div>
-
-            <div class="flow-summary">
+          <aside class="panel proof-panel" id="proof">
+            <div class="panel-header">
               <div>
-                <span>Target</span>
-                <strong id="summaryTarget">Sakura Sushi Ginza</strong>
+                <p class="eyebrow">Mantle deposit</p>
+                <h2>Payment proof</h2>
               </div>
-              <div>
-                <span>Location</span>
-                <strong id="summaryLocation">Ginza, Tokyo</strong>
-              </div>
-              <div>
-                <span>Amount</span>
-                <strong id="summaryAmount">12.00 USDC</strong>
-              </div>
-              <div>
-                <span>Status</span>
-                <strong id="summaryStatus">Ready</strong>
-              </div>
+              <span id="paymentBadge" class="state-pill">Waiting</span>
             </div>
 
-            <div class="detail-layout">
-              <div class="intent-panel">
-                <div class="panel-title">
-                  <p class="eyebrow">Detected intent</p>
-                  <h3 id="intentTitle">Book a table</h3>
-                </div>
-                <div class="intent-grid" id="intentGrid"></div>
-              </div>
+            <dl class="proof-list">
+              <div><dt>Reservation ID</dt><dd id="reservationId">Not created</dd></div>
+              <div><dt>Network</dt><dd>Mantle</dd></div>
+              <div><dt>Token</dt><dd>USDC demo</dd></div>
+              <div><dt>Recipient</dt><dd>0x7a90...D0GE</dd></div>
+              <div><dt>Amount</dt><dd id="proofAmount">12 USDC</dd></div>
+            </dl>
 
-              <div class="item-panel">
-                <div class="panel-title">
-                  <p class="eyebrow">Prepared items</p>
-                  <h3 id="itemsTitle">Reservation packet</h3>
-                </div>
-                <div class="prepared-list" id="preparedList"></div>
-              </div>
+            <div class="hash-box">
+              <span>Transaction hash</span>
+              <code id="txHash">No transaction yet</code>
             </div>
 
-            <div class="flow-actions">
-              <button id="confirmBtn" class="primary-btn" type="button" disabled>Confirm Prepared Request</button>
-              <button id="approvePaymentBtn" class="secondary-btn" type="button" disabled>Approve Mantle Payment</button>
-              <button id="verifyPaymentBtn" class="secondary-btn" type="button" disabled>Verify Proof</button>
+            <div class="button-stack">
+              <button id="approvePaymentBtn" class="primary-btn" type="button" disabled>Approve Mantle Deposit</button>
+              <button id="verifyPaymentBtn" class="secondary-btn" type="button" disabled>Verify Proof & Confirm</button>
             </div>
-          </article>
-
-          <aside class="right-rail">
-            <section class="rail-panel" id="mantle-proof">
-              <div class="rail-header">
-                <div>
-                  <p class="eyebrow">Mantle proof</p>
-                  <h2>Payment approval</h2>
-                </div>
-                <span id="paymentStatus" class="state-pill">Waiting</span>
-              </div>
-
-              <dl class="payment-list">
-                <div><dt>Request ID</dt><dd id="requestId">Not created</dd></div>
-                <div><dt>Network</dt><dd>Mantle</dd></div>
-                <div><dt>Token</dt><dd id="paymentToken">USDC demo</dd></div>
-                <div><dt>Recipient</dt><dd id="paymentRecipient">Escrow wallet</dd></div>
-                <div><dt>Amount</dt><dd id="paymentAmount">12.00 USDC</dd></div>
-              </dl>
-
-              <div class="hash-box">
-                <span>Transaction hash</span>
-                <code id="txHash">No transaction yet</code>
-              </div>
-            </section>
-
-            <section class="rail-panel">
-              <div class="rail-header">
-                <div>
-                  <p class="eyebrow">Agent timeline</p>
-                  <h2>Execution state</h2>
-                </div>
-                <span id="agentState" class="state-pill">Idle</span>
-              </div>
-
-              <div class="timeline" id="timeline">
-                <div class="timeline-step active" data-step="capture"><span></span><div><strong>Capture</strong><p>Voice or text request</p></div></div>
-                <div class="timeline-step" data-step="prepare"><span></span><div><strong>Prepare</strong><p>Find option and details</p></div></div>
-                <div class="timeline-step" data-step="confirm"><span></span><div><strong>Confirm</strong><p>Lock booking, order, or cart</p></div></div>
-                <div class="timeline-step" data-step="approve"><span></span><div><strong>Approve</strong><p>User signs Mantle transaction</p></div></div>
-                <div class="timeline-step" data-step="proof"><span></span><div><strong>Proof</strong><p>Backend verifies transaction</p></div></div>
-              </div>
-            </section>
           </aside>
         </section>
 
-        <section class="ops-grid">
-          <article class="ops-panel">
-            <div class="panel-title">
-              <p class="eyebrow">Operations table</p>
-              <h2>Live requests</h2>
+        <section class="dashboard-grid" id="restaurant">
+          <article class="panel restaurant-dashboard">
+            <div class="panel-header">
+              <div>
+                <p class="eyebrow">Restaurant dashboard</p>
+                <h2>Owner control room</h2>
+              </div>
+              <span id="dashboardBadge" class="state-pill">Live</span>
             </div>
+
+            <div class="owner-query">
+              <label for="ownerQuestion">Owner asks the dashboard</label>
+              <div>
+                <input id="ownerQuestion" type="text" value="How many reservations do we have today?">
+                <button id="askOwnerBtn" class="secondary-btn" type="button">Ask</button>
+              </div>
+              <p id="ownerAnswer">You have 18 reservations today. 7 open dinner slots remain.</p>
+            </div>
+
             <div class="table-wrap">
               <table>
                 <thead>
                   <tr>
-                    <th>Request</th>
-                    <th>Workflow</th>
-                    <th>Target</th>
-                    <th>Amount</th>
-                    <th>Approval</th>
-                    <th>Mantle proof</th>
+                    <th>Reservation</th>
+                    <th>Customer</th>
+                    <th>Guests</th>
+                    <th>Time</th>
+                    <th>Deposit</th>
                     <th>Status</th>
                   </tr>
                 </thead>
-                <tbody id="opsTable"></tbody>
+                <tbody id="reservationTable"></tbody>
               </table>
             </div>
           </article>
 
-          <article class="activity-panel" id="activity">
-            <div class="panel-title">
-              <p class="eyebrow">Activity</p>
-              <h2>Decision log</h2>
+          <article class="panel activity-panel" id="timeline">
+            <div class="panel-header">
+              <div>
+                <p class="eyebrow">Execution timeline</p>
+                <h2>Agent workflow</h2>
+              </div>
+              <span id="timelineBadge" class="state-pill">Ready</span>
             </div>
+
+            <div class="timeline">
+              <div class="timeline-step active" data-step="capture"><span></span><div><strong>Capture request</strong><p>Voice/chat input received</p></div></div>
+              <div class="timeline-step" data-step="extract"><span></span><div><strong>Extract details</strong><p>Guests, time, date, restaurant rules</p></div></div>
+              <div class="timeline-step" data-step="availability"><span></span><div><strong>Check availability</strong><p>Slot selected from restaurant data</p></div></div>
+              <div class="timeline-step" data-step="deposit"><span></span><div><strong>Request deposit</strong><p>User must approve wallet transaction</p></div></div>
+              <div class="timeline-step" data-step="verify"><span></span><div><strong>Verify payment</strong><p>Backend checks Mantle transaction proof</p></div></div>
+              <div class="timeline-step" data-step="confirm"><span></span><div><strong>Confirm booking</strong><p>Restaurant dashboard updates</p></div></div>
+            </div>
+
             <div class="activity-list" id="activityList"></div>
           </article>
         </section>
 
         <footer class="footer-note">
-          Doge automates discovery and preparation. Mantle provides verifiable payment proof only after user approval.
+          Hackathon MVP: one complete workflow now. Food ordering, cancellations, analytics depth, and multi-business support remain roadmap features.
         </footer>
       </main>
     </div>
