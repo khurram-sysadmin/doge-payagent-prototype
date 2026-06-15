@@ -22,7 +22,9 @@
     authMessage: document.getElementById("authMessage"),
   };
 
-  let latestState = window.DogeSync.getState();
+  let latestState = { reservations: [] };
+  let ownerUnlocked = !window.DogeSync.isConfigured();
+  let unsubscribeFromSync = null;
 
   function setPill(element, label, mode = "") {
     element.textContent = label;
@@ -41,6 +43,33 @@
     item.className = "activity-item";
     item.innerHTML = `<strong>${title}</strong><span>${body}</span>`;
     el.activityList.prepend(item);
+  }
+
+  function lockOwnerView(message = "Sign in as restaurant owner to view reservation analytics.") {
+    ownerUnlocked = false;
+    latestState = { reservations: [] };
+    el.metricReservations.textContent = "--";
+    el.metricReservationsNote.textContent = "sign in required";
+    el.metricConfirmed.textContent = "--";
+    el.metricPending.textContent = "--";
+    el.metricDeposits.textContent = "--";
+    el.reservationTable.innerHTML = "";
+    el.ownerAnswer.textContent = message;
+    el.activityList.innerHTML = "";
+    el.ownerHeaderStatus.textContent = "Locked";
+    el.ownerQuestion.disabled = true;
+    el.askOwnerBtn.disabled = true;
+    setPill(el.dashboardBadge, "Locked");
+    setPill(el.assistantBadge, "Locked");
+  }
+
+  function unlockOwnerView() {
+    ownerUnlocked = true;
+    el.ownerQuestion.disabled = false;
+    el.askOwnerBtn.disabled = false;
+    setPill(el.dashboardBadge, "Syncing", "pending");
+    setPill(el.assistantBadge, "Ready");
+    el.ownerHeaderStatus.textContent = "Syncing";
   }
 
   function renderTable(reservations) {
@@ -74,6 +103,11 @@
   }
 
   function answerOwnerQuestion() {
+    if (!ownerUnlocked) {
+      el.ownerAnswer.textContent = "Please sign in as restaurant owner before asking operational questions.";
+      return;
+    }
+
     const question = el.ownerQuestion.value.toLowerCase();
     const reservations = latestState.reservations;
     const latest = [...reservations].reverse().find((item) => String(item.id).startsWith("DOGE-RSV-"));
@@ -107,13 +141,40 @@
     const result = await window.DogeSync.signInOwner(el.ownerEmail.value.trim(), el.ownerPassword.value);
     el.authMessage.textContent = result.message;
     setPill(el.authBadge, result.ok ? "Signed in" : "Demo mode", result.ok ? "verified" : "");
-    if (result.ok) window.DogeSync.refresh();
+    if (result.ok) startOwnerSync();
   }
 
   async function signOutOwner() {
     const result = await window.DogeSync.signOutOwner();
     el.authMessage.textContent = result.message;
     setPill(el.authBadge, "Signed out");
+    if (unsubscribeFromSync) unsubscribeFromSync();
+    unsubscribeFromSync = null;
+    lockOwnerView("Signed out. Owner data is hidden.");
+  }
+
+  async function startOwnerSync() {
+    if (unsubscribeFromSync) unsubscribeFromSync();
+    unlockOwnerView();
+    unsubscribeFromSync = await window.DogeSync.subscribe((syncState) => {
+      if (!ownerUnlocked) return;
+      const previousLatestId = latestState.reservations.at(-1)?.id;
+      latestState = syncState;
+      renderTable(syncState.reservations);
+      renderMetrics(syncState.reservations);
+      setPill(el.dashboardBadge, "Synced", "verified");
+      el.ownerHeaderStatus.textContent = "Synced";
+
+      const latest = syncState.reservations.at(-1);
+      if (latest && latest.id !== previousLatestId) {
+        addActivity("Reservation synced", `${latest.id} arrived for ${latest.party_size} guests at ${latest.reservation_time}.`);
+      }
+      if (latest && String(latest.id).startsWith("DOGE-RSV-")) {
+        el.ownerAnswer.textContent = `You have ${syncState.reservations.length + 15} reservations today. Latest synced booking: ${latest.reservation_time} for ${latest.party_size} guests, status ${latest.status}.`;
+      } else {
+        el.ownerAnswer.textContent = `You have ${syncState.reservations.length + 15} reservations today. No new Doge booking has arrived yet.`;
+      }
+    });
   }
 
   el.askOwnerBtn.addEventListener("click", answerOwnerQuestion);
@@ -125,24 +186,18 @@
 
   el.syncMode.textContent = window.DogeSync.syncLabel();
   if (window.DogeSync.isConfigured()) {
-    setPill(el.authBadge, "Auth ready", "pending");
+    lockOwnerView();
+    setPill(el.authBadge, "Sign in required", "pending");
     el.authMessage.textContent = "Use an owner Supabase Auth account to sign in.";
+    window.DogeSync.getSession().then((session) => {
+      if (!session) return;
+      setPill(el.authBadge, "Signed in", "verified");
+      el.authMessage.textContent = "Owner session restored.";
+      startOwnerSync();
+    });
+  } else {
+    setPill(el.authBadge, "Demo mode");
+    el.authMessage.textContent = "Supabase is not configured, so local demo owner data is visible.";
+    startOwnerSync();
   }
-
-  window.DogeSync.subscribe((syncState) => {
-    const previousLatestId = latestState.reservations.at(-1)?.id;
-    latestState = syncState;
-    renderTable(syncState.reservations);
-    renderMetrics(syncState.reservations);
-    setPill(el.dashboardBadge, "Synced", "verified");
-    el.ownerHeaderStatus.textContent = "Synced";
-
-    const latest = syncState.reservations.at(-1);
-    if (latest && latest.id !== previousLatestId) {
-      addActivity("Reservation synced", `${latest.id} arrived for ${latest.party_size} guests at ${latest.reservation_time}.`);
-    }
-    if (latest && String(latest.id).startsWith("DOGE-RSV-")) {
-      el.ownerAnswer.textContent = `You have ${syncState.reservations.length + 15} reservations today. Latest synced booking: ${latest.reservation_time} for ${latest.party_size} guests, status ${latest.status}.`;
-    }
-  });
 })();

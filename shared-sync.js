@@ -105,6 +105,10 @@
     return JSON.parse(JSON.stringify(currentState));
   }
 
+  function hasLocalDemoReservations() {
+    return currentState.reservations.some((reservation) => String(reservation.id).startsWith("DOGE-RSV-"));
+  }
+
   function mergeReservation(reservation) {
     const existing = currentState.reservations.filter((item) => item.id !== reservation.id);
     const nextReservation = {
@@ -159,7 +163,8 @@
     return supabaseClient;
   }
 
-  async function fetchRemote() {
+  async function fetchRemote(options = {}) {
+    const preserveLocalOnEmpty = options.preserveLocalOnEmpty !== false;
     const client = await getClient();
     if (!client) return getState();
 
@@ -171,10 +176,15 @@
 
     if (error || !Array.isArray(data)) return getState();
 
+    if (!data.length && preserveLocalOnEmpty && hasLocalDemoReservations()) {
+      notify();
+      return getState();
+    }
+
     currentState = {
       restaurant_id: restaurantId,
       updated_at: new Date().toISOString(),
-      reservations: data.length ? data : baseReservations,
+      reservations: data.length ? data : [],
     };
     notify();
     return getState();
@@ -193,7 +203,7 @@
       updated_at: new Date().toISOString(),
     });
 
-    return fetchRemote();
+    return fetchRemote({ preserveLocalOnEmpty: true });
   }
 
   async function updateReservation(id, patch) {
@@ -236,7 +246,7 @@
     const client = await getClient();
     if (!client) return () => subscribers.delete(callback);
 
-    await fetchRemote();
+    await fetchRemote({ preserveLocalOnEmpty: true });
     client
       .channel(`reservations-${restaurantId}`)
       .on(

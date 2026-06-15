@@ -47,22 +47,22 @@
         <section class="metrics" id="overview" aria-label="Owner metrics">
           <article>
             <span>Today's Reservations</span>
-            <strong id="metricReservations">18</strong>
-            <small id="metricReservationsNote">waiting for sync</small>
+            <strong id="metricReservations">--</strong>
+            <small id="metricReservationsNote">sign in required</small>
           </article>
           <article>
             <span>Confirmed</span>
-            <strong id="metricConfirmed">2</strong>
+            <strong id="metricConfirmed">--</strong>
             <small>paid or accepted</small>
           </article>
           <article>
             <span>Pending Payment</span>
-            <strong id="metricPending">1</strong>
+            <strong id="metricPending">--</strong>
             <small>Mantle deposit needed</small>
           </article>
           <article>
             <span>Deposit Total</span>
-            <strong id="metricDeposits">24 USDC</strong>
+            <strong id="metricDeposits">--</strong>
             <small>verified deposits</small>
           </article>
         </section>
@@ -110,7 +110,7 @@
                 <input id="ownerQuestion" type="text" value="How many reservations do we have today?">
                 <button id="askOwnerBtn" class="secondary-btn" type="button">Ask</button>
               </div>
-              <p id="ownerAnswer">Waiting for synced reservation data.</p>
+              <p id="ownerAnswer">Sign in as restaurant owner to view reservation analytics.</p>
             </div>
 
             <div class="activity-list" id="activityList"></div>
@@ -127,7 +127,7 @@
           </div>
 
           <p class="auth-copy">
-            For production, owner access should use Supabase Auth and Row Level Security. In demo mode, this page works without credentials so the hackathon flow remains clickable.
+            Owner access uses Supabase Auth and Row Level Security. Reservation details stay hidden until the restaurant owner signs in.
           </p>
 
           <div class="auth-grid">
