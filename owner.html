@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Doge PayAgent | Owner Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar" aria-label="Owner dashboard navigation">
+        <div class="brand">
+          <div class="brand-mark">D</div>
+          <div>
+            <strong>Doge PayAgent</strong>
+            <span>Owner control room</span>
+          </div>
+        </div>
+
+        <nav class="side-nav">
+          <a class="active" href="#overview">Overview</a>
+          <a href="#reservations">Reservations</a>
+          <a href="#assistant">Owner Assistant</a>
+          <a href="#auth">Auth</a>
+        </nav>
+
+        <div class="sidebar-card">
+          <span class="live-dot"></span>
+          <strong>Owner view only</strong>
+          <p>Restaurant staff see reservation operations, payment status, and the owner assistant. Customer booking UI is not visible here.</p>
+        </div>
+      </aside>
+
+      <main class="main">
+        <header class="page-hero">
+          <div>
+            <p class="eyebrow">Sakura Sushi Tokyo</p>
+            <h1>Restaurant owner dashboard.</h1>
+            <p>Watch customer reservations sync live, verify Mantle deposit status, and ask operational questions.</p>
+          </div>
+          <div class="sync-card">
+            <span id="syncMode">Sync starting</span>
+            <strong id="ownerHeaderStatus">Live</strong>
+          </div>
+        </header>
+
+        <section class="metrics" id="overview" aria-label="Owner metrics">
+          <article>
+            <span>Today's Reservations</span>
+            <strong id="metricReservations">18</strong>
+            <small id="metricReservationsNote">waiting for sync</small>
+          </article>
+          <article>
+            <span>Confirmed</span>
+            <strong id="metricConfirmed">2</strong>
+            <small>paid or accepted</small>
+          </article>
+          <article>
+            <span>Pending Payment</span>
+            <strong id="metricPending">1</strong>
+            <small>Mantle deposit needed</small>
+          </article>
+          <article>
+            <span>Deposit Total</span>
+            <strong id="metricDeposits">24 USDC</strong>
+            <small>verified deposits</small>
+          </article>
+        </section>
+
+        <section class="owner-grid">
+          <article class="panel restaurant-dashboard" id="reservations">
+            <div class="panel-header">
+              <div>
+                <p class="eyebrow">Reservations</p>
+                <h2>Live reservation queue</h2>
+              </div>
+              <span id="dashboardBadge" class="state-pill">Live</span>
+            </div>
+
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Reservation</th>
+                    <th>Customer</th>
+                    <th>Guests</th>
+                    <th>Time</th>
+                    <th>Deposit</th>
+                    <th>Status</th>
+                    <th>Tx Hash</th>
+                  </tr>
+                </thead>
+                <tbody id="reservationTable"></tbody>
+              </table>
+            </div>
+          </article>
+
+          <aside class="panel owner-side-panel" id="assistant">
+            <div class="panel-header">
+              <div>
+                <p class="eyebrow">Owner assistant</p>
+                <h2>Ask operations</h2>
+              </div>
+              <span id="assistantBadge" class="state-pill">Ready</span>
+            </div>
+
+            <div class="owner-query">
+              <label for="ownerQuestion">Owner asks</label>
+              <div>
+                <input id="ownerQuestion" type="text" value="How many reservations do we have today?">
+                <button id="askOwnerBtn" class="secondary-btn" type="button">Ask</button>
+              </div>
+              <p id="ownerAnswer">Waiting for synced reservation data.</p>
+            </div>
+
+            <div class="activity-list" id="activityList"></div>
+          </aside>
+        </section>
+
+        <section class="panel auth-panel" id="auth">
+          <div class="panel-header">
+            <div>
+              <p class="eyebrow">Owner authentication</p>
+              <h2>Supabase Auth</h2>
+            </div>
+            <span id="authBadge" class="state-pill">Demo mode</span>
+          </div>
+
+          <p class="auth-copy">
+            For production, owner access should use Supabase Auth and Row Level Security. In demo mode, this page works without credentials so the hackathon flow remains clickable.
+          </p>
+
+          <div class="auth-grid">
+            <input id="ownerEmail" type="text" placeholder="owner@example.com" autocomplete="username">
+            <input id="ownerPassword" type="password" placeholder="Password" autocomplete="current-password">
+            <button id="ownerLoginBtn" class="primary-btn" type="button">Sign In Owner</button>
+            <button id="ownerLogoutBtn" class="ghost-btn" type="button">Sign Out</button>
+          </div>
+          <p id="authMessage" class="auth-message">Fill `supabase-config.js` to enable real owner authentication.</p>
+        </section>
+      </main>
+    </div>
+
+    <script src="supabase-config.js"></script>
+    <script src="shared-sync.js"></script>
+    <script src="owner.js"></script>
+  </body>
+</html>

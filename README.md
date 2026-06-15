@@ -2,76 +2,126 @@
 
 Doge PayAgent is a B2B restaurant AI agent prototype for the Mantle hackathon.
 
-The current MVP focuses on one complete workflow instead of many incomplete features:
+The focused MVP now has two separate dashboards:
+
+- `customer.html` for restaurant customers.
+- `owner.html` for restaurant owners/staff.
+
+The customer never sees owner analytics or controls. The owner never sees the customer booking interface.
+
+## Current Hackathon Workflow
 
 ```text
-Customer voice/chat request
--> Doge extracts reservation details
--> Restaurant availability is checked
+Customer dashboard
+-> Customer speaks/types reservation request
+-> Doge extracts party size and time
+-> Doge checks restaurant availability
 -> Pending reservation is created
 -> Customer approves Mantle deposit
 -> Payment proof is verified
--> Restaurant dashboard updates
+-> Owner dashboard updates
 ```
 
-## Current Hackathon Scope
+## Sync Model
 
-- Customer chatbot and browser voice demo.
-- Restaurant reservation workflow.
-- Restaurant owner dashboard update.
-- Mantle deposit/payment proof simulation.
-- Owner assistant questions for reservation/payment status.
+The app supports two sync modes:
 
-Food ordering, cancellations, advanced analytics, inventory, multi-business support, and POS integrations are future roadmap items.
+### 1. Local Demo Sync
 
-## Demo
+Works immediately with no setup.
 
-Open `index.html` in a browser.
+Open both pages in two tabs:
 
-The prototype is static and has no required dependencies. It is designed for quick GitHub Pages deployment.
+```text
+customer.html
+owner.html
+```
+
+When the customer creates/confirms a reservation, the owner dashboard updates through browser storage and `BroadcastChannel`.
+
+### 2. Supabase Realtime Sync
+
+Production-style setup.
+
+1. Run `docs/supabase-two-dashboard-sync.sql` in Supabase SQL editor.
+2. Create an owner user in Supabase Auth.
+3. Insert that owner user's UUID into `restaurant_members`.
+4. Enable Realtime for the `reservations` table.
+5. Fill `supabase-config.js`:
+
+```js
+window.DOGE_SUPABASE_CONFIG = {
+  url: "https://YOUR_PROJECT.supabase.co",
+  anonKey: "YOUR_SUPABASE_ANON_KEY",
+  restaurantId: "sakura-sushi-tokyo",
+  tableName: "reservations",
+};
+```
+
+Never put a Supabase service-role key in frontend code or GitHub Pages.
+
+## Authentication
+
+Authentication is good and should be used for the owner dashboard.
+
+For this MVP:
+
+- Customer page is public.
+- Owner page supports Supabase Auth login.
+- Supabase Row Level Security controls owner access.
+- Public customer insert/update policies are included only for the static hackathon demo.
+
+For production, customer payment verification should move behind a backend endpoint or Supabase Edge Function.
+
+## Demo Pages
+
+Open:
+
+```text
+index.html
+```
+
+Then launch:
+
+```text
+customer.html
+owner.html
+```
 
 ## What The Prototype Demonstrates
 
-- Customer asks Doge to book a table.
-- Browser microphone can capture a request when supported.
-- Text fallback works immediately.
-- Doge extracts party size and requested time.
-- Doge checks a demo restaurant availability board.
-- Doge creates a pending reservation.
-- Customer approves a Mantle deposit.
-- The app generates a simulated transaction hash.
-- Backend verification is simulated.
-- Reservation becomes confirmed.
-- Restaurant dashboard updates with the confirmed paid booking.
-- Owner assistant answers simple operational questions.
-
-## Suggested GitHub Pages Setup
-
-After uploading this folder to GitHub:
-
-1. Go to repository Settings.
-2. Open Pages.
-3. Set source to `Deploy from a branch`.
-4. Select the `main` branch and `/root`.
-5. Save and use the generated GitHub Pages URL as the demo link.
+- Separate customer and owner dashboards.
+- Customer voice/chat reservation flow.
+- AI-style reservation detail extraction.
+- Availability slot selection.
+- Mantle deposit approval simulation.
+- Transaction hash / payment proof simulation.
+- Owner dashboard live reservation queue.
+- Owner assistant answering operational questions.
+- Supabase-ready sync architecture with local fallback.
 
 ## Next Build Steps
 
-1. Replace simulated reservation logic with Supabase tables.
-2. Connect the existing ElevenLabs/n8n voice workflow.
-3. Add restaurant onboarding for menu, slots, rules, and FAQ data.
-4. Add wallet connection with MetaMask or Reown AppKit.
-5. Verify Mantle transactions with `viem` or `ethers`.
-6. Store transaction proof against the reservation ID.
-7. Add food ordering only after the reservation workflow is stable.
+1. Connect real Supabase project credentials.
+2. Create owner Auth account and membership row.
+3. Replace simulated Mantle tx hash with wallet connection.
+4. Verify Mantle transactions with `viem` or `ethers`.
+5. Move payment verification to a backend/Edge Function.
+6. Add food ordering after reservation workflow is stable.
 
 ## Repository Structure
 
 ```text
 .
 |-- index.html
+|-- customer.html
+|-- owner.html
 |-- styles.css
-|-- app.js
+|-- supabase-config.js
+|-- shared-sync.js
+|-- customer.js
+|-- owner.js
 |-- docs/
+|   |-- supabase-two-dashboard-sync.sql
 |-- README.md
 ```

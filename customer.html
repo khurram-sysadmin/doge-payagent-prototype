@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Doge PayAgent | Customer Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar" aria-label="Customer dashboard navigation">
+        <div class="brand">
+          <div class="brand-mark">D</div>
+          <div>
+            <strong>Doge PayAgent</strong>
+            <span>Customer reservation</span>
+          </div>
+        </div>
+
+        <nav class="side-nav">
+          <a class="active" href="#customer-demo">Book Table</a>
+          <a href="#payment">Mantle Deposit</a>
+          <a href="#status">Status</a>
+        </nav>
+
+        <div class="sidebar-card">
+          <span class="live-dot"></span>
+          <strong>Customer view only</strong>
+          <p>Customers can book, pay, and track their own reservation. Owner analytics are not visible here.</p>
+        </div>
+      </aside>
+
+      <main class="main">
+        <header class="page-hero">
+          <div>
+            <p class="eyebrow">Sakura Sushi Tokyo</p>
+            <h1>Book a table with Doge.</h1>
+            <p>Speak or type your reservation request. Doge checks availability and confirms only after Mantle deposit proof is verified.</p>
+          </div>
+          <div class="sync-card">
+            <span id="syncMode">Sync starting</span>
+            <strong id="customerHeaderStatus">Ready</strong>
+          </div>
+        </header>
+
+        <section class="customer-grid" id="customer-demo">
+          <article class="panel customer-panel">
+            <div class="panel-header">
+              <div>
+                <p class="eyebrow">Customer agent</p>
+                <h2>Voice and chat</h2>
+              </div>
+              <span id="agentBadge" class="state-pill">Idle</span>
+            </div>
+
+            <div class="mic-stage">
+              <button id="voiceBtn" class="mic-button" type="button" aria-label="Start microphone">
+                <span></span>
+              </button>
+              <div class="voice-waves" aria-hidden="true">
+                <i></i><i></i><i></i><i></i><i></i>
+              </div>
+              <p id="voiceStatus">Click the mic or use the demo request.</p>
+            </div>
+
+            <label class="input-label" for="requestText">Customer request</label>
+            <textarea id="requestText" rows="4">Hi Doge, book a table for 4 people tonight at 8 PM.</textarea>
+
+            <div class="button-row">
+              <button id="runAgentBtn" class="primary-btn" type="button">Run Reservation Agent</button>
+              <button id="demoVoiceBtn" class="secondary-btn" type="button">Demo Voice</button>
+              <button id="resetBtn" class="ghost-btn" type="button">Reset Demo</button>
+            </div>
+
+            <label class="toggle-row">
+              <input id="speakReplyToggle" type="checkbox" checked>
+              <span>Doge voice reply</span>
+            </label>
+
+            <div class="chat-window" id="chatWindow" aria-live="polite"></div>
+          </article>
+
+          <article class="panel extraction-panel">
+            <div class="panel-header">
+              <div>
+                <p class="eyebrow">Reservation details</p>
+                <h2>Booking packet</h2>
+              </div>
+              <span id="packetStatus" class="state-pill">Not created</span>
+            </div>
+
+            <div class="reservation-card">
+              <div>
+                <span>Name</span>
+                <strong id="guestName">Muhammad</strong>
+              </div>
+              <div>
+                <span>Guests</span>
+                <strong id="partySize">--</strong>
+              </div>
+              <div>
+                <span>Date</span>
+                <strong id="bookingDate">Tonight</strong>
+              </div>
+              <div>
+                <span>Time</span>
+                <strong id="bookingTime">--</strong>
+              </div>
+              <div>
+                <span>Table</span>
+                <strong id="tableSlot">--</strong>
+              </div>
+              <div>
+                <span>Deposit</span>
+                <strong id="depositAmount">12 USDC</strong>
+              </div>
+            </div>
+
+            <div class="availability-board">
+              <div class="board-title">
+                <span>Tonight availability</span>
+                <strong id="slotDecision">Waiting for request</strong>
+              </div>
+              <div class="slot-grid" id="slotGrid"></div>
+            </div>
+
+            <div class="agent-note" id="agentNote">
+              Doge will only confirm the reservation after you approve the Mantle deposit.
+            </div>
+          </article>
+
+          <aside class="panel proof-panel" id="payment">
+            <div class="panel-header">
+              <div>
+                <p class="eyebrow">Mantle deposit</p>
+                <h2>Payment proof</h2>
+              </div>
+              <span id="paymentBadge" class="state-pill">Waiting</span>
+            </div>
+
+            <dl class="proof-list">
+              <div><dt>Reservation ID</dt><dd id="reservationId">Not created</dd></div>
+              <div><dt>Network</dt><dd>Mantle</dd></div>
+              <div><dt>Token</dt><dd>USDC demo</dd></div>
+              <div><dt>Recipient</dt><dd>0x7a90...D0GE</dd></div>
+              <div><dt>Amount</dt><dd id="proofAmount">12 USDC</dd></div>
+            </dl>
+
+            <div class="hash-box">
+              <span>Transaction hash</span>
+              <code id="txHash">No transaction yet</code>
+            </div>
+
+            <div class="button-stack">
+              <button id="approvePaymentBtn" class="primary-btn" type="button" disabled>Approve Mantle Deposit</button>
+              <button id="verifyPaymentBtn" class="secondary-btn" type="button" disabled>Verify Proof & Confirm</button>
+            </div>
+          </aside>
+        </section>
+
+        <section class="panel customer-status-panel" id="status">
+          <div class="panel-header">
+            <div>
+              <p class="eyebrow">Customer status</p>
+              <h2>Your reservation</h2>
+            </div>
+            <span id="customerStatusBadge" class="state-pill">No active booking</span>
+          </div>
+          <div class="customer-status-grid">
+            <div><span>Restaurant</span><strong>Sakura Sushi Tokyo</strong></div>
+            <div><span>Reservation</span><strong id="customerReservationSummary">Not created</strong></div>
+            <div><span>Payment</span><strong id="customerPaymentSummary">Waiting</strong></div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script src="supabase-config.js"></script>
+    <script src="shared-sync.js"></script>
+    <script src="customer.js"></script>
+  </body>
+</html>
